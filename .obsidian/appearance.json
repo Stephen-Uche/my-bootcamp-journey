@@ -4,6 +4,6 @@
   "translucidityAdjustment": 0,
   "baseFontSize": 16,
   "baseFontFamily": "Segoe UI, Roboto",
-  "baseFontColor": "",
+  "baseFontColor": "white",
   "accentColor": ""
 }
