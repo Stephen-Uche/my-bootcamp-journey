@@ -1,4 +1,4 @@
-# Day 1 — June 9, 2026
+# Day 1 — June 8, 2026
 
 ## What I Did Today
 
