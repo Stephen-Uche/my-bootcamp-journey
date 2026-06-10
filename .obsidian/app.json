@@ -1,5 +1,7 @@
 {
-  "baseFontSize": 16,
+  "translucidityAdjustment": 0,
+  "baseFontFamily": "Segoe UI, Roboto",
+  "baseFontColor": "white",
   "legacyEditor": false,
   "livePreview": true,
   "strictLineBreaks": false,
