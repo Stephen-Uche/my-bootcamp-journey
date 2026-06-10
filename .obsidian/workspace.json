@@ -11,14 +11,12 @@
             "id": "075014f5f51104e3",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "pdf",
               "state": {
-                "file": "notes/Day 1.md",
-                "mode": "source",
-                "source": false
+                "file": "notes/Day 3.pdf"
               },
-              "icon": "lucide-file",
-              "title": "Day 1"
+              "icon": "lucide-file-text",
+              "title": "Day 3"
             }
           }
         ]
@@ -185,7 +183,9 @@
   },
   "active": "075014f5f51104e3",
   "lastOpenFiles": [
+    "notes/Day 1.md",
     "README.md",
-    "notes/Day 1.md"
+    "notes/Day 3.md",
+    "notes/Day 3.pdf"
   ]
 }
