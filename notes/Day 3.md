@@ -144,3 +144,123 @@
 - [ ] Map these strategies to my e-commerce app roadmap
 - [ ] Identify which region's approach best fits my market
 - [ ] Deep-dive into Mercari's IPO filings (they went public)
+
+---
+
+## Individual Work: E-Commerce App Validation
+
+### My Idea
+**Used Products Marketplace for Students + Non-Students**
+- **What:** Global marketplace for buying/selling used goods (textbooks, appliances, furniture, gadgets)
+- **Who:** Students (primary), non-students (secondary) on tight budgets
+- **Problem:** Students need affordable textbooks ($200+ new), appliances, furniture. Non-students want to sell clutter. Current platforms (eBay, Facebook, Craigslist) are unsafe, slow, clunky.
+- **Why Now:** Cost-of-living crisis + budget constraints forcing people to buy used. No student-first marketplace exists globally.
+
+---
+
+### 4 Filters Validation
+
+#### Filter 1: **PAINFUL** ✓
+**Question:** Is this problem painful enough people will pay to solve it?
+
+- Students spend ~**$1,200/year** on textbooks alone (mostly one-time use)
+- Textbooks cost **$200-300 new**, resell for **$50-100** (waste)
+- Laptops, printers, desks cost **$200-800 new**; students need them desperately
+- **Pain Level:** HIGH — Budget constraint is real and acute
+
+**Evidence:** 
+- Mercari ($1.3B funded), Vinted ($8.8B valued), Poshmark all prove demand
+- Students will drive 1 hour to save $50 on used textbooks
+
+---
+
+#### Filter 2: **FREQUENT** ✓
+**Question:** Does this problem happen regularly?
+
+- **Semester cycles:** Students buy/sell every 3-4 months
+- **Course material changes:** New editions yearly force replacements
+- **Moving seasons:** Dorm changes, graduations, relocations (3-4x/year per cohort)
+- **Time-bound peaks:** Aug (back-to-school), Jan (New Year), May (end of semester)
+
+**Frequency:** VERY HIGH — Not one-time. Recurring every semester.
+
+---
+
+#### Filter 3: **LARGE ENOUGH** ✓
+**Question:** Is the market big enough to build a company?
+
+- **Global student population:** 280 million
+- **Adults buying/selling used goods:** 2+ billion
+- **Used goods market:** $400+ billion globally
+- **Textbook market alone:** $50 billion/year
+- **Regional proof:** Mercari, Vinted, Poshmark all scaled to billions
+
+**Market Size:** MASSIVE — Easily $10B+ addressable market
+
+---
+
+#### Filter 4: **UNDERSERVED** ✓
+**Question:** Is this gap actually underserved?
+
+| Platform | Strength | Gap |
+|----------|----------|-----|
+| **eBay** | General, big audience | Messy, not student-optimized |
+| **Facebook Marketplace** | Local, community | No ratings, unsafe, unreliable |
+| **Craigslist** | Simple | Dangerous, unmoderated, dead |
+| **Mercari** | Trusted, clean | Japan-first, slow global expansion |
+| **Poshmark** | Community, trust | Fashion-only, not books/appliances |
+| **Vinted** | Growing, EU-strong | Fashion-centric, expanding slowly |
+| **OfferUp** | Mobile-first | Cluttered, not niche-focused |
+
+**Gap:** No player owns **"global, student-first, multi-category used goods marketplace with trust + community"**
+
+**Result:** YES — UNDERSERVED. The category is wide open.
+
+---
+
+### All Filters Pass? ✅ **YES → READY FOR BUILD**
+
+Your idea passes all 4 filters. It's a real problem worth solving.
+
+---
+
+### 5 Whys: Root Cause Analysis
+
+| Why # | Question | Answer |
+|-------|----------|--------|
+| **Why 1** | Why do students struggle? | Limited budgets but need expensive textbooks, laptops, furniture upfront |
+| **Why 2** | Why limited budgets? | Tuition + housing + food consume most income. Can't afford new at $200+ |
+| **Why 3** | Why are textbooks so expensive? | Publishers control pricing; new editions yearly prevent used market competition |
+| **Why 4** | Why don't students sell their stuff? | Existing platforms (Facebook, eBay, Craigslist) are hard, unsafe, time-consuming |
+| **Why 5** | **What's the root problem?** | **Friction + Trust Gap: No safe, easy, community-driven marketplace for student-to-student used goods** |
+
+---
+
+### Problem Statement
+
+**For:** Students and budget-conscious non-students  
+**Who:** Need affordable access to textbooks, appliances, furniture, electronics  
+**The Problem:** Current marketplaces (eBay, Facebook, Craigslist) are fragmented, unsafe, slow, and not designed for the student community  
+**The Impact:** Students overpay for single-use textbooks, delay purchases, or go without. Sellers struggle to reach buyers. Trust is low.  
+**A Successful Solution Would:** Be student-first, mobile-optimized, have verified users, instant messaging, safe payments, and community-driven (reviews, ratings, moderation).
+
+**In One Sentence:** *A global, student-first used goods marketplace where buying and selling textbooks, appliances, and furniture is as easy and safe as buying on Amazon.*
+
+---
+
+### Key Learnings from Startups
+
+- **From Mercari:** Build trust through ratings + moderation. Community > scale.
+- **From Vinted:** Mobile-first design. Gen Z wants 1-tap checkout.
+- **From Poshmark:** Community features (shares, comments, "love") drive stickiness.
+- **From ByteDance:** Algorithm drives discovery. If recommendations work, retention soars.
+- **From Alibaba:** Offer complementary services (escrow, shipping labels, insurance).
+
+---
+
+### Next Phase
+
+- [ ] Validate with 10 students: "How much would you pay for 1-click textbook selling?"
+- [ ] Map GTM: Which cohort to launch with? (First-year students, entire campus, city?)
+- [ ] Wireframe MVP: Mobile app or web-first?
+- [ ] Tech stack planning: Based on Mercari/Vinted analysis
