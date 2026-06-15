@@ -11,12 +11,14 @@
             "id": "075014f5f51104e3",
             "type": "leaf",
             "state": {
-              "type": "pdf",
+              "type": "markdown",
               "state": {
-                "file": "notes/Day 3.pdf"
+                "file": "notes/Day 1.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-file-text",
-              "title": "Day 3"
+              "icon": "lucide-file",
+              "title": "Day 1"
             }
           }
         ]
@@ -183,9 +185,11 @@
   },
   "active": "075014f5f51104e3",
   "lastOpenFiles": [
+    "student_marketplace_investor_pitch.pdf",
+    "notes/Day 3.pdf",
+    "notes/Day3.pdf",
     "notes/Day 1.md",
     "README.md",
-    "notes/Day 3.md",
-    "notes/Day 3.pdf"
+    "notes/Day 3.md"
   ]
 }
