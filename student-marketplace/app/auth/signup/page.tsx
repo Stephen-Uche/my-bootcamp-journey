@@ -48,10 +48,13 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md">
-      <Card>
+    <div className="-mx-4 -my-8 grid min-h-[calc(100vh-73px)] place-items-center bg-[linear-gradient(90deg,rgba(249,250,251,0.96),rgba(249,250,251,0.72)),url('/images/student-marketplace-hero.png')] bg-cover bg-center px-4 py-12">
+      <Card className="w-full max-w-md border-white/70 bg-white/90 shadow-2xl shadow-gray-900/10 backdrop-blur">
         <CardHeader>
           <CardTitle className="text-2xl">Create student account</CardTitle>
+          <p className="text-sm text-gray-600">
+            Use a student gmail.se address or an approved Swedish university email.
+          </p>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
@@ -71,7 +74,7 @@ export default function SignupPage() {
 
             <div className="space-y-2">
               <label className="text-sm font-medium" htmlFor="email">
-                University email
+                Student email
               </label>
               <input
                 className="h-11 w-full rounded-md border border-gray-300 px-3 text-sm outline-none focus:border-blue-600"
@@ -81,6 +84,7 @@ export default function SignupPage() {
                 type="email"
                 value={form.email}
               />
+              <p className="text-xs text-gray-500">Example: name@gmail.se</p>
             </div>
 
             <div className="space-y-2">

@@ -28,10 +28,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md">
-      <Card>
+    <div className="-mx-4 -my-8 grid min-h-[calc(100vh-73px)] place-items-center bg-[linear-gradient(90deg,rgba(249,250,251,0.96),rgba(249,250,251,0.72)),url('/images/student-marketplace-hero.png')] bg-cover bg-center px-4 py-12">
+      <Card className="w-full max-w-md border-white/70 bg-white/90 shadow-2xl shadow-gray-900/10 backdrop-blur">
         <CardHeader>
           <CardTitle className="text-2xl">Sign in</CardTitle>
+          <p className="text-sm text-gray-600">
+            Continue with your student gmail.se or approved university email.
+          </p>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>

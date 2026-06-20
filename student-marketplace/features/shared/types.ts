@@ -33,10 +33,10 @@ export const signupSchema = z.object({
   email: z.string().email('Invalid email').refine(
     (email) => {
       const domain = email.split('@')[1]?.toLowerCase() || ''
-      const validDomains = ['gu.se', 'lnu.se', 'kth.se', 'umeå.se', 'su.se', 'miun.se']
+      const validDomains = ['gmail.se', 'gu.se', 'lnu.se', 'kth.se', 'umeå.se', 'su.se', 'miun.se']
       return validDomains.some((d) => domain.endsWith(d))
     },
-    'Only Swedish university emails are allowed for now'
+    'Use a student gmail.se email or an approved Swedish university email'
   ),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   fullName: z.string().min(2, 'Name required'),
