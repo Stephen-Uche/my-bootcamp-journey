@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { logout } from '@/features/auth/api'
 import { supabase } from '@/lib/supabase-client'
 
 type AuthUser = {
@@ -12,6 +13,7 @@ type AuthUser = {
 export function Navigation() {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   useEffect(() => {
     const getUser = async () => {
@@ -28,6 +30,14 @@ export function Navigation() {
 
     return () => listener.subscription.unsubscribe()
   }, [])
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    await logout()
+    setUser(null)
+    setIsLoggingOut(false)
+    window.location.href = '/'
+  }
 
   return (
     <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white">
@@ -51,6 +61,9 @@ export function Navigation() {
               <Link href="/profile">
                 <Button variant="outline">{user.email?.split('@')[0]}</Button>
               </Link>
+              <Button disabled={isLoggingOut} onClick={handleLogout} variant="ghost">
+                {isLoggingOut ? 'Signing out...' : 'Logout'}
+              </Button>
             </>
           ) : (
             <>
