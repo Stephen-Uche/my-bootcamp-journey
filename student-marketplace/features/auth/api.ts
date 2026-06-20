@@ -1,5 +1,29 @@
 import { isSupabaseConfigured, supabase } from '@/lib/supabase-client'
-import type { SignupInput } from '@/features/shared/types'
+import type { SignupEmailInput, SignupInput } from '@/features/shared/types'
+
+export async function requestSignupCode(input: SignupEmailInput) {
+  if (!isSupabaseConfigured) {
+    return { success: false, error: 'Supabase is not configured. Update .env.local first.' }
+  }
+
+  try {
+    const { error } = await supabase.auth.signInWithOtp({
+      email: input.email,
+      options: {
+        shouldCreateUser: true,
+      },
+    })
+
+    if (error) throw error
+
+    return { success: true }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to send verification code',
+    }
+  }
+}
 
 export async function signup(input: SignupInput) {
   if (!isSupabaseConfigured) {
@@ -7,14 +31,20 @@ export async function signup(input: SignupInput) {
   }
 
   try {
-    const { data, error } = await supabase.auth.signUp({
+    const { error: verifyError } = await supabase.auth.verifyOtp({
       email: input.email,
+      token: input.verificationCode,
+      type: 'email',
+    })
+
+    if (verifyError) throw verifyError
+
+    const { data, error } = await supabase.auth.updateUser({
       password: input.password,
-      options: {
-        data: {
-          full_name: input.fullName,
-          university: input.email.split('@')[1],
-        },
+      data: {
+        full_name: input.fullName,
+        university: 'Google Mail',
+        verified_student: true,
       },
     })
 

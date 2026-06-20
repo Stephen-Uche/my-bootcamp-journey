@@ -4,17 +4,19 @@ import Link from 'next/link'
 import { FormEvent, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { signup } from '@/features/auth/api'
-import { signupSchema } from '@/features/shared/types'
+import { requestSignupCode, signup } from '@/features/auth/api'
+import { signupEmailSchema, signupSchema } from '@/features/shared/types'
 
 type FormState = {
   email: string
+  verificationCode: string
   password: string
   fullName: string
 }
 
 const initialFormState: FormState = {
   email: '',
+  verificationCode: '',
   password: '',
   fullName: '',
 }
@@ -22,9 +24,33 @@ const initialFormState: FormState = {
 export default function SignupPage() {
   const [form, setForm] = useState<FormState>(initialFormState)
   const [message, setMessage] = useState('')
+  const [hasCodeBeenSent, setHasCodeBeenSent] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleCodeRequest = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setMessage('')
+
+    const parsed = signupEmailSchema.safeParse({ email: form.email })
+    if (!parsed.success) {
+      setMessage(parsed.error.issues[0]?.message || 'Enter a valid Google Mail address.')
+      return
+    }
+
+    setIsSubmitting(true)
+    const result = await requestSignupCode(parsed.data)
+    setIsSubmitting(false)
+
+    if (!result.success) {
+      setMessage(result.error || 'Could not send verification code.')
+      return
+    }
+
+    setHasCodeBeenSent(true)
+    setMessage('Verification code sent. Check your email and paste the code below.')
+  }
+
+  const handleVerifiedSignup = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setMessage('')
 
@@ -44,7 +70,8 @@ export default function SignupPage() {
     }
 
     setForm(initialFormState)
-    setMessage('Account created. Check your email if confirmation is enabled in Supabase.')
+    setHasCodeBeenSent(false)
+    setMessage('Account verified and created. You can now sign in.')
   }
 
   return (
@@ -53,61 +80,106 @@ export default function SignupPage() {
         <CardHeader>
           <CardTitle className="text-2xl">Create student account</CardTitle>
           <p className="text-sm text-gray-600">
-            Use a student gmail.se address or an approved Swedish university email.
+            Verify your Google Mail address with a code before completing sign-up.
           </p>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="fullName">
-                Full name
-              </label>
-              <input
-                className="h-11 w-full rounded-md border border-gray-300 px-3 text-sm outline-none focus:border-blue-600"
-                id="fullName"
-                minLength={2}
-                onChange={(event) => setForm({ ...form, fullName: event.target.value })}
-                required
-                value={form.fullName}
-              />
-            </div>
-
+          <form className="space-y-4" onSubmit={handleCodeRequest}>
             <div className="space-y-2">
               <label className="text-sm font-medium" htmlFor="email">
-                Student email
+                Google Mail address
               </label>
               <input
                 className="h-11 w-full rounded-md border border-gray-300 px-3 text-sm outline-none focus:border-blue-600"
+                disabled={hasCodeBeenSent || isSubmitting}
                 id="email"
                 onChange={(event) => setForm({ ...form, email: event.target.value })}
                 required
                 type="email"
                 value={form.email}
               />
-              <p className="text-xs text-gray-500">Example: name@gmail.se</p>
+              <p className="text-xs text-gray-500">Use gmail.com, googlemail.com, or gmail.se.</p>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="password">
-                Password
-              </label>
-              <input
-                className="h-11 w-full rounded-md border border-gray-300 px-3 text-sm outline-none focus:border-blue-600"
-                id="password"
-                minLength={8}
-                onChange={(event) => setForm({ ...form, password: event.target.value })}
-                required
-                type="password"
-                value={form.password}
-              />
-            </div>
-
-            {message ? <p className="text-sm text-gray-700">{message}</p> : null}
-
-            <Button className="w-full" disabled={isSubmitting} type="submit">
-              {isSubmitting ? 'Creating account...' : 'Sign Up'}
-            </Button>
+            {!hasCodeBeenSent ? (
+              <Button className="w-full" disabled={isSubmitting} type="submit">
+                {isSubmitting ? 'Sending code...' : 'Send Verification Code'}
+              </Button>
+            ) : null}
           </form>
+
+          {hasCodeBeenSent ? (
+            <form className="mt-5 space-y-4 border-t border-gray-200 pt-5" onSubmit={handleVerifiedSignup}>
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="verificationCode">
+                  Verification code
+                </label>
+                <input
+                  className="h-11 w-full rounded-md border border-gray-300 px-3 text-sm tracking-[0.35em] outline-none focus:border-blue-600"
+                  id="verificationCode"
+                  inputMode="numeric"
+                  maxLength={6}
+                  minLength={6}
+                  onChange={(event) =>
+                    setForm({
+                      ...form,
+                      verificationCode: event.target.value.replace(/\D/g, '').slice(0, 6),
+                    })
+                  }
+                  placeholder="000000"
+                  required
+                  value={form.verificationCode}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="fullName">
+                  Full name
+                </label>
+                <input
+                  className="h-11 w-full rounded-md border border-gray-300 px-3 text-sm outline-none focus:border-blue-600"
+                  id="fullName"
+                  minLength={2}
+                  onChange={(event) => setForm({ ...form, fullName: event.target.value })}
+                  required
+                  value={form.fullName}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium" htmlFor="password">
+                  Password
+                </label>
+                <input
+                  className="h-11 w-full rounded-md border border-gray-300 px-3 text-sm outline-none focus:border-blue-600"
+                  id="password"
+                  minLength={8}
+                  onChange={(event) => setForm({ ...form, password: event.target.value })}
+                  required
+                  type="password"
+                  value={form.password}
+                />
+              </div>
+
+              <Button className="w-full" disabled={isSubmitting} type="submit">
+                {isSubmitting ? 'Verifying...' : 'Verify Code and Sign Up'}
+              </Button>
+
+              <button
+                className="w-full text-sm font-medium text-blue-600 hover:text-blue-700"
+                onClick={() => {
+                  setHasCodeBeenSent(false)
+                  setForm({ ...form, verificationCode: '' })
+                  setMessage('')
+                }}
+                type="button"
+              >
+                Use another email
+              </button>
+            </form>
+          ) : null}
+
+          {message ? <p className="mt-4 text-sm text-gray-700">{message}</p> : null}
 
           <p className="mt-4 text-center text-sm text-gray-600">
             Already have an account?{' '}

@@ -29,20 +29,47 @@ export interface Listing {
   updated_at: string
 }
 
+const googleMailDomains = ['gmail.com', 'googlemail.com', 'gmail.se']
+
+export const googleMailSchema = z.string().email('Invalid email').refine(
+  (email) => {
+    const domain = email.split('@')[1]?.toLowerCase() || ''
+    return googleMailDomains.includes(domain)
+  },
+  'Use a Google Mail account: gmail.com, googlemail.com, or gmail.se'
+)
+
+export const signupEmailSchema = z.object({
+  email: googleMailSchema,
+})
+
+export type SignupEmailInput = z.infer<typeof signupEmailSchema>
+
 export const signupSchema = z.object({
-  email: z.string().email('Invalid email').refine(
-    (email) => {
-      const domain = email.split('@')[1]?.toLowerCase() || ''
-      const validDomains = ['gmail.se', 'gu.se', 'lnu.se', 'kth.se', 'umeå.se', 'su.se', 'miun.se']
-      return validDomains.some((d) => domain.endsWith(d))
-    },
-    'Use a student gmail.se email or an approved Swedish university email'
-  ),
+  email: googleMailSchema,
+  verificationCode: z
+    .string()
+    .trim()
+    .min(6, 'Enter the 6-digit verification code')
+    .max(6, 'Enter the 6-digit verification code'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   fullName: z.string().min(2, 'Name required'),
 })
 
 export type SignupInput = z.infer<typeof signupSchema>
+
+export const loginSchema = z.object({
+  email: z.string().email('Invalid email').refine(
+    (email) => {
+      const domain = email.split('@')[1]?.toLowerCase() || ''
+      return googleMailDomains.includes(domain)
+    },
+    'Use your verified Google Mail account'
+  ),
+  password: z.string().min(1, 'Password required'),
+})
+
+export type LoginInput = z.infer<typeof loginSchema>
 
 export interface User {
   id: string

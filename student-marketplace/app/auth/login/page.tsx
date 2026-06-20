@@ -5,6 +5,7 @@ import { FormEvent, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { login } from '@/features/auth/api'
+import { loginSchema } from '@/features/shared/types'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -15,8 +16,15 @@ export default function LoginPage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setMessage('')
+
+    const parsed = loginSchema.safeParse({ email, password })
+    if (!parsed.success) {
+      setMessage(parsed.error.issues[0]?.message || 'Check your login details.')
+      return
+    }
+
     setIsSubmitting(true)
-    const result = await login(email, password)
+    const result = await login(parsed.data.email, parsed.data.password)
     setIsSubmitting(false)
 
     if (!result.success) {
@@ -33,7 +41,7 @@ export default function LoginPage() {
         <CardHeader>
           <CardTitle className="text-2xl">Sign in</CardTitle>
           <p className="text-sm text-gray-600">
-            Continue with your student gmail.se or approved university email.
+            Continue with your verified Google Mail account.
           </p>
         </CardHeader>
         <CardContent>
