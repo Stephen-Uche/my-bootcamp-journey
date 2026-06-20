@@ -1,7 +1,11 @@
-import { supabase } from '@/lib/supabase-client'
+import { isSupabaseConfigured, supabase } from '@/lib/supabase-client'
 import type { SignupInput } from '@/features/shared/types'
 
 export async function signup(input: SignupInput) {
+  if (!isSupabaseConfigured) {
+    return { success: false, error: 'Supabase is not configured. Update .env.local first.' }
+  }
+
   try {
     const { data, error } = await supabase.auth.signUp({
       email: input.email,
@@ -23,6 +27,10 @@ export async function signup(input: SignupInput) {
 }
 
 export async function login(email: string, password: string) {
+  if (!isSupabaseConfigured) {
+    return { success: false, error: 'Supabase is not configured. Update .env.local first.' }
+  }
+
   try {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) throw error
@@ -33,6 +41,10 @@ export async function login(email: string, password: string) {
 }
 
 export async function logout() {
+  if (!isSupabaseConfigured) {
+    return { success: false, error: 'Supabase is not configured. Update .env.local first.' }
+  }
+
   try {
     const { error } = await supabase.auth.signOut()
     if (error) throw error
@@ -43,6 +55,10 @@ export async function logout() {
 }
 
 export async function getCurrentUser() {
+  if (!isSupabaseConfigured) {
+    return null
+  }
+
   try {
     const { data, error } = await supabase.auth.getUser()
     if (error || !data.user) return null

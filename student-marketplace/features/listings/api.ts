@@ -1,5 +1,5 @@
 
-import { supabase } from '@/lib/supabase-client'
+import { isSupabaseConfigured, supabase } from '@/lib/supabase-client'
 import type { CreateListingInput, Listing } from '@/features/shared/types'
 
 export async function getListings(
@@ -10,6 +10,11 @@ export async function getListings(
     offset?: number
   }
 ): Promise<Listing[]> {
+  if (!isSupabaseConfigured) {
+    console.warn('Supabase is not configured. Update NEXT_PUBLIC_SUPABASE_URL in .env.local.')
+    return []
+  }
+
   try {
     let query = supabase.from('listings').select('*').eq('status', 'available')
 
@@ -38,6 +43,11 @@ export async function getListings(
 }
 
 export async function getListingById(id: string): Promise<Listing | null> {
+  if (!isSupabaseConfigured) {
+    console.warn('Supabase is not configured. Update NEXT_PUBLIC_SUPABASE_URL in .env.local.')
+    return null
+  }
+
   try {
     const { data, error } = await supabase.from('listings').select('*').eq('id', id).single()
 
@@ -49,6 +59,10 @@ export async function getListingById(id: string): Promise<Listing | null> {
 }
 
 export async function createListing(input: CreateListingInput & { seller_id: string }) {
+  if (!isSupabaseConfigured) {
+    return { success: false, error: 'Supabase is not configured.' }
+  }
+
   try {
     const { data, error } = await supabase
       .from('listings')
@@ -76,6 +90,10 @@ export async function createListing(input: CreateListingInput & { seller_id: str
 }
 
 export async function updateListingStatus(id: string, status: 'available' | 'sold' | 'removed') {
+  if (!isSupabaseConfigured) {
+    return { success: false, error: 'Supabase is not configured.' }
+  }
+
   try {
     const { error } = await supabase.from('listings').update({ status }).eq('id', id)
     if (error) throw error
