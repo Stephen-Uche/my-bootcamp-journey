@@ -75,6 +75,7 @@ export async function createListing(input: CreateListingInput & { seller_id: str
           price: input.price,
           condition: input.condition,
           status: 'available',
+          photos: input.imageUrl ? [input.imageUrl] : [],
         },
       ])
       .select()

@@ -23,6 +23,16 @@ async function ListingsGrid() {
       {listings.map((listing) => (
         <Link key={listing.id} href={`/listing/${listing.id}`}>
           <Card className="cursor-pointer transition-shadow hover:shadow-lg">
+            {listing.photos?.[0] ? (
+              <div className="aspect-[4/3] overflow-hidden rounded-t-lg bg-gray-100">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  alt={listing.title}
+                  className="h-full w-full object-cover transition-transform hover:scale-105"
+                  src={listing.photos[0]}
+                />
+              </div>
+            ) : null}
             <CardHeader>
               <CardTitle className="line-clamp-2 text-lg">{listing.title}</CardTitle>
               <p className="text-sm text-gray-500">{listing.category}</p>

@@ -14,6 +14,7 @@ type FormState = {
   category: string
   price: string
   condition: 'new' | 'like-new' | 'good' | 'fair'
+  imageUrl: string
 }
 
 const categories = ['books', 'furniture', 'electronics', 'clothing', 'kitchen', 'other']
@@ -24,6 +25,7 @@ const initialFormState: FormState = {
   category: 'books',
   price: '',
   condition: 'good',
+  imageUrl: '',
 }
 
 export default function PostPage() {
@@ -136,6 +138,33 @@ export default function PostPage() {
                 required
                 value={form.description}
               />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="imageUrl">
+                Image URL
+              </label>
+              <input
+                className="h-11 w-full rounded-md border border-gray-300 px-3 text-sm outline-none focus:border-blue-600"
+                id="imageUrl"
+                onChange={(event) => setForm({ ...form, imageUrl: event.target.value })}
+                placeholder="https://example.com/item-photo.jpg"
+                type="url"
+                value={form.imageUrl}
+              />
+              <p className="text-xs text-gray-500">
+                Add a public image link. It will appear with the listing description.
+              </p>
+              {form.imageUrl ? (
+                <div className="overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    alt="Listing preview"
+                    className="h-48 w-full object-cover"
+                    src={form.imageUrl}
+                  />
+                </div>
+              ) : null}
             </div>
 
             <div className="grid gap-4 sm:grid-cols-3">
