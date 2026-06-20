@@ -5,7 +5,7 @@ import { FormEvent, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/features/auth/api'
-import { createListing } from '@/features/listings/api'
+import { createListing, uploadListingPhoto } from '@/features/listings/api'
 import { createListingSchema } from '@/features/shared/types'
 
 type FormState = {
@@ -14,7 +14,6 @@ type FormState = {
   category: string
   price: string
   condition: 'new' | 'like-new' | 'good' | 'fair'
-  imageUrl: string
 }
 
 const categories = ['books', 'furniture', 'electronics', 'clothing', 'kitchen', 'other']
@@ -25,7 +24,6 @@ const initialFormState: FormState = {
   category: 'books',
   price: '',
   condition: 'good',
-  imageUrl: '',
 }
 
 export default function PostPage() {
@@ -33,6 +31,8 @@ export default function PostPage() {
   const [sellerId, setSellerId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreviewUrl, setImagePreviewUrl] = useState('')
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -44,6 +44,18 @@ export default function PostPage() {
 
     loadUser()
   }, [])
+
+  useEffect(() => {
+    if (!imageFile) {
+      setImagePreviewUrl('')
+      return
+    }
+
+    const objectUrl = URL.createObjectURL(imageFile)
+    setImagePreviewUrl(objectUrl)
+
+    return () => URL.revokeObjectURL(objectUrl)
+  }, [imageFile])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -65,7 +77,19 @@ export default function PostPage() {
     }
 
     setIsSubmitting(true)
-    const result = await createListing({ ...parsed.data, seller_id: sellerId })
+
+    let imageUrl = ''
+    if (imageFile) {
+      const uploadResult = await uploadListingPhoto(imageFile, sellerId)
+      if (!uploadResult.success) {
+        setIsSubmitting(false)
+        setMessage(uploadResult.error || 'Failed to upload image.')
+        return
+      }
+      imageUrl = uploadResult.url || ''
+    }
+
+    const result = await createListing({ ...parsed.data, imageUrl, seller_id: sellerId })
     setIsSubmitting(false)
 
     if (!result.success) {
@@ -74,6 +98,7 @@ export default function PostPage() {
     }
 
     setForm(initialFormState)
+    setImageFile(null)
     setMessage('Listing created. It is now available in browse.')
   }
 
@@ -140,28 +165,60 @@ export default function PostPage() {
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium" htmlFor="imageUrl">
-                Image URL
+            <div className="space-y-3">
+              <label className="text-sm font-medium" htmlFor="imageFile">
+                Upload image
               </label>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label
+                  className="flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-5 text-center text-sm text-gray-600 transition hover:border-blue-500 hover:bg-blue-50"
+                  htmlFor="imageFile"
+                >
+                  <span className="font-medium text-gray-900">Choose from files</span>
+                  <span className="mt-1 text-xs">JPG, PNG, WebP, or HEIC</span>
+                </label>
+                <label
+                  className="flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-5 text-center text-sm text-gray-600 transition hover:border-blue-500 hover:bg-blue-50"
+                  htmlFor="cameraImage"
+                >
+                  <span className="font-medium text-gray-900">Take photo</span>
+                  <span className="mt-1 text-xs">Opens camera on supported devices</span>
+                </label>
+              </div>
               <input
-                className="h-11 w-full rounded-md border border-gray-300 px-3 text-sm outline-none focus:border-blue-600"
-                id="imageUrl"
-                onChange={(event) => setForm({ ...form, imageUrl: event.target.value })}
-                placeholder="https://example.com/item-photo.jpg"
-                type="url"
-                value={form.imageUrl}
+                accept="image/*"
+                className="sr-only"
+                id="imageFile"
+                onChange={(event) => setImageFile(event.target.files?.[0] || null)}
+                type="file"
               />
-              <p className="text-xs text-gray-500">
-                Add a public image link. It will appear with the listing description.
-              </p>
-              {form.imageUrl ? (
+              <input
+                accept="image/*"
+                capture="environment"
+                className="sr-only"
+                id="cameraImage"
+                onChange={(event) => setImageFile(event.target.files?.[0] || null)}
+                type="file"
+              />
+              {imageFile ? (
+                <div className="flex items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm">
+                  <span className="truncate text-gray-700">{imageFile.name}</span>
+                  <button
+                    className="font-medium text-blue-600 hover:text-blue-700"
+                    onClick={() => setImageFile(null)}
+                    type="button"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : null}
+              {imagePreviewUrl ? (
                 <div className="overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     alt="Listing preview"
                     className="h-48 w-full object-cover"
-                    src={form.imageUrl}
+                    src={imagePreviewUrl}
                   />
                 </div>
               ) : null}

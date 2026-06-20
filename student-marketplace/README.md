@@ -88,6 +88,20 @@ If Supabase email confirmation is enabled, new users must confirm their email be
 3. Open `Email`.
 4. Turn off `Confirm email` for local development, or keep it enabled for production.
 
+### Configure listing image uploads
+
+The post form uploads listing photos to Supabase Storage before creating the listing.
+
+1. Open Supabase Dashboard.
+2. Go to `Storage`.
+3. Create a public bucket named `listing-images`.
+4. Make sure the `listings` table has a `photos` column:
+
+```sql
+alter table listings
+add column if not exists photos text[] default '{}';
+```
+
 ---
 
 ## Step 3: Understand the Shared Types and Validation Layer

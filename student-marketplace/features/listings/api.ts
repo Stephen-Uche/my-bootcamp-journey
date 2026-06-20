@@ -2,6 +2,37 @@
 import { isSupabaseConfigured, supabase } from '@/lib/supabase-client'
 import type { CreateListingInput, Listing } from '@/features/shared/types'
 
+const listingImagesBucket = 'listing-images'
+
+export async function uploadListingPhoto(file: File, sellerId: string) {
+  if (!isSupabaseConfigured) {
+    return { success: false, error: 'Supabase is not configured.' }
+  }
+
+  try {
+    const extension = file.name.split('.').pop() || 'jpg'
+    const filePath = `${sellerId}/${crypto.randomUUID()}.${extension}`
+    const { error } = await supabase.storage
+      .from(listingImagesBucket)
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        contentType: file.type,
+        upsert: false,
+      })
+
+    if (error) throw error
+
+    const { data } = supabase.storage.from(listingImagesBucket).getPublicUrl(filePath)
+
+    return { success: true, url: data.publicUrl }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to upload image',
+    }
+  }
+}
+
 export async function getListings(
   filters?: {
     category?: string
