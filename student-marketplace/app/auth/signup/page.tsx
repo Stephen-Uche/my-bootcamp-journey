@@ -9,14 +9,14 @@ import { signupEmailSchema, signupSchema } from '@/features/shared/types'
 
 type FormState = {
   email: string
-  verificationCode: string
+  verificationToken: string
   password: string
   fullName: string
 }
 
 const initialFormState: FormState = {
   email: '',
-  verificationCode: '',
+  verificationToken: '',
   password: '',
   fullName: '',
 }
@@ -47,7 +47,7 @@ export default function SignupPage() {
     }
 
     setHasCodeBeenSent(true)
-    setMessage('Verification code sent. Check your email and paste the code below.')
+    setMessage('Verification email sent. Paste the 6-digit code or confirmation link below.')
   }
 
   const handleVerifiedSignup = async (event: FormEvent<HTMLFormElement>) => {
@@ -80,7 +80,7 @@ export default function SignupPage() {
         <CardHeader>
           <CardTitle className="text-2xl">Create student account</CardTitle>
           <p className="text-sm text-gray-600">
-            Verify your Google Mail address with a code before completing sign-up.
+            Verify your Google Mail address before completing sign-up.
           </p>
         </CardHeader>
         <CardContent>
@@ -112,24 +112,25 @@ export default function SignupPage() {
             <form className="mt-5 space-y-4 border-t border-gray-200 pt-5" onSubmit={handleVerifiedSignup}>
               <div className="space-y-2">
                 <label className="text-sm font-medium" htmlFor="verificationCode">
-                  Verification code
+                  Verification code or confirmation link
                 </label>
-                <input
-                  className="h-11 w-full rounded-md border border-gray-300 px-3 text-sm tracking-[0.35em] outline-none focus:border-blue-600"
+                <textarea
+                  className="min-h-24 w-full resize-y rounded-md border border-gray-300 px-3 py-3 text-sm outline-none focus:border-blue-600"
                   id="verificationCode"
-                  inputMode="numeric"
-                  maxLength={6}
-                  minLength={6}
                   onChange={(event) =>
                     setForm({
                       ...form,
-                      verificationCode: event.target.value.replace(/\D/g, '').slice(0, 6),
+                      verificationToken: event.target.value.trim(),
                     })
                   }
-                  placeholder="000000"
+                  placeholder="Paste 000000 or https://.../auth/v1/verify?token=..."
                   required
-                  value={form.verificationCode}
+                  value={form.verificationToken}
                 />
+                <p className="text-xs text-gray-500">
+                  If your Supabase email shows a Confirm email address button, copy that link and
+                  paste it here.
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -169,7 +170,7 @@ export default function SignupPage() {
                 className="w-full text-sm font-medium text-blue-600 hover:text-blue-700"
                 onClick={() => {
                   setHasCodeBeenSent(false)
-                  setForm({ ...form, verificationCode: '' })
+                  setForm({ ...form, verificationToken: '' })
                   setMessage('')
                 }}
                 type="button"

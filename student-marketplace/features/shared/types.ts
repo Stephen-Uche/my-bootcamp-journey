@@ -47,11 +47,10 @@ export type SignupEmailInput = z.infer<typeof signupEmailSchema>
 
 export const signupSchema = z.object({
   email: googleMailSchema,
-  verificationCode: z
+  verificationToken: z
     .string()
     .trim()
-    .min(6, 'Enter the 6-digit verification code')
-    .max(6, 'Enter the 6-digit verification code'),
+    .min(6, 'Paste the 6-digit code or the Supabase confirmation link from your email'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   fullName: z.string().min(2, 'Name required'),
 })

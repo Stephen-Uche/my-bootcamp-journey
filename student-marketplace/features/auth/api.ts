@@ -1,6 +1,28 @@
 import { isSupabaseConfigured, supabase } from '@/lib/supabase-client'
 import type { SignupEmailInput, SignupInput } from '@/features/shared/types'
 
+function parseVerificationInput(input: string) {
+  const value = input.trim()
+
+  if (/^\d{6}$/.test(value)) {
+    return { token: value, type: 'email' as const }
+  }
+
+  try {
+    const url = new URL(value)
+    const tokenHash = url.searchParams.get('token')
+    const type = url.searchParams.get('type') || 'signup'
+
+    if (tokenHash) {
+      return { token_hash: tokenHash, type }
+    }
+  } catch {
+    // The input is not a URL. Treat it as the raw token from the Supabase link.
+  }
+
+  return { token_hash: value, type: 'signup' as const }
+}
+
 export async function requestSignupCode(input: SignupEmailInput) {
   if (!isSupabaseConfigured) {
     return { success: false, error: 'Supabase is not configured. Update .env.local first.' }
@@ -31,10 +53,10 @@ export async function signup(input: SignupInput) {
   }
 
   try {
+    const verification = parseVerificationInput(input.verificationToken)
     const { error: verifyError } = await supabase.auth.verifyOtp({
       email: input.email,
-      token: input.verificationCode,
-      type: 'email',
+      ...verification,
     })
 
     if (verifyError) throw verifyError
