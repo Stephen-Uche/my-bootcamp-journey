@@ -29,8 +29,37 @@ export interface Listing {
   updated_at: string
 }
 
+const allowedEmailDomains = [
+  'gmail.com',
+  'gmail.se',
+  'googlemail.com',
+  'gu.se',
+  'lnu.se',
+  'kth.se',
+  'umeå.se',
+  'su.se',
+  'miun.se',
+]
+
+export const studentEmailSchema = z.string().email('Invalid email').refine(
+  (email) => {
+    const domain = email.split('@')[1]?.toLowerCase() || ''
+    return allowedEmailDomains.some((allowedDomain) => domain.endsWith(allowedDomain))
+  },
+  'Use gmail.com or an approved student email address'
+)
+
+export const signupSchema = z.object({
+  email: studentEmailSchema,
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  fullName: z.string().min(2, 'Name required'),
+})
+
+export type SignupInput = z.infer<typeof signupSchema>
+
 export const loginSchema = z.object({
-  provider: z.literal('google').default('google'),
+  email: studentEmailSchema,
+  password: z.string().min(1, 'Password required'),
 })
 
 export type LoginInput = z.infer<typeof loginSchema>

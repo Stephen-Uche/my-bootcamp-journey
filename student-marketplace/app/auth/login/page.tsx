@@ -1,25 +1,38 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { FormEvent, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { signInWithGoogle } from '@/features/auth/api'
+import { login } from '@/features/auth/api'
+import { loginSchema } from '@/features/shared/types'
 
 export default function LoginPage() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleGoogleSignIn = async () => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
     setMessage('')
+
+    const parsed = loginSchema.safeParse({ email, password })
+    if (!parsed.success) {
+      setMessage(parsed.error.issues[0]?.message || 'Check your login details.')
+      return
+    }
+
     setIsSubmitting(true)
-    const result = await signInWithGoogle()
+    const result = await login(parsed.data)
     setIsSubmitting(false)
 
     if (!result.success) {
-      setMessage(result.error || 'Google sign-in failed.')
+      setMessage(result.error || 'Login failed.')
       return
     }
+
+    setMessage('Signed in successfully.')
   }
 
   return (
@@ -28,16 +41,43 @@ export default function LoginPage() {
         <CardHeader>
           <CardTitle className="text-2xl">Sign in</CardTitle>
           <p className="text-sm text-gray-600">
-            Continue with your Google Mail account. No email code is required.
+            Sign in with gmail.com or your student email address.
           </p>
         </CardHeader>
         <CardContent>
-          <Button className="h-12 w-full gap-3 bg-white text-gray-900 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50" disabled={isSubmitting} onClick={handleGoogleSignIn}>
-            <span className="grid size-6 place-items-center rounded-full bg-blue-600 text-sm font-bold text-white">
-              G
-            </span>
-            {isSubmitting ? 'Opening Google...' : 'Continue with Google'}
-          </Button>
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="email">
+                Email
+              </label>
+              <input
+                className="h-11 w-full rounded-md border border-gray-300 px-3 text-sm outline-none focus:border-blue-600"
+                id="email"
+                onChange={(event) => setEmail(event.target.value)}
+                required
+                type="email"
+                value={email}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="password">
+                Password
+              </label>
+              <input
+                className="h-11 w-full rounded-md border border-gray-300 px-3 text-sm outline-none focus:border-blue-600"
+                id="password"
+                onChange={(event) => setPassword(event.target.value)}
+                required
+                type="password"
+                value={password}
+              />
+            </div>
+
+            <Button className="w-full" disabled={isSubmitting} type="submit">
+              {isSubmitting ? 'Signing in...' : 'Sign In'}
+            </Button>
+          </form>
 
           {message ? <p className="mt-4 text-sm text-gray-700">{message}</p> : null}
 

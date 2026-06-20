@@ -77,16 +77,16 @@ lib/supabase-client.ts
 
 The app requires `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to start. `SUPABASE_SERVICE_ROLE_KEY` is optional in the current code because the server client falls back to the anon key.
 
-### Configure Google sign-in
+### Configure email sign-in
 
-The app uses Supabase Google OAuth for sign-up and sign-in. Users continue with a Google Mail account, so no email token or confirmation code is required in the app.
+The app uses Supabase email/password authentication. Users can sign up and sign in with `gmail.com`, `gmail.se`, `googlemail.com`, or an approved student/university email domain.
+
+If Supabase email confirmation is enabled, new users must confirm their email before they can sign in. If you want immediate sign-in during local development, disable email confirmation in Supabase:
 
 1. Open Supabase Dashboard.
 2. Go to `Authentication` -> `Providers`.
-3. Enable `Google`.
-4. Add the Google OAuth client ID and client secret.
-5. In Google Cloud Console, add the Supabase callback URL shown in the Supabase Google provider settings.
-6. For local development, make sure `http://localhost:3000` is allowed in Supabase auth URL settings.
+3. Open `Email`.
+4. Turn off `Confirm email` for local development, or keep it enabled for production.
 
 ---
 
@@ -105,6 +105,8 @@ This file contains:
 - `createListingSchema`
 - `CreateListingInput`
 - `Listing`
+- `signupSchema`
+- `SignupInput`
 - `loginSchema`
 - `LoginInput`
 - `User`
@@ -116,7 +118,7 @@ The shared layer gives the project:
 - One source of truth for listing and signup data
 - Runtime validation through Zod
 - TypeScript types inferred from validation schemas
-- Consistent auth provider typing for Google sign-in
+- Consistent email rules for Gmail and approved student mail
 
 ---
 

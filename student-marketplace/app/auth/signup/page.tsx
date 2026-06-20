@@ -1,24 +1,50 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { FormEvent, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { signInWithGoogle } from '@/features/auth/api'
+import { signup } from '@/features/auth/api'
+import { signupSchema } from '@/features/shared/types'
+
+type FormState = {
+  email: string
+  password: string
+  fullName: string
+}
+
+const initialFormState: FormState = {
+  email: '',
+  password: '',
+  fullName: '',
+}
 
 export default function SignupPage() {
+  const [form, setForm] = useState<FormState>(initialFormState)
   const [message, setMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleGoogleSignIn = async () => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
     setMessage('')
+
+    const parsed = signupSchema.safeParse(form)
+    if (!parsed.success) {
+      setMessage(parsed.error.issues[0]?.message || 'Check your signup details.')
+      return
+    }
+
     setIsSubmitting(true)
-    const result = await signInWithGoogle()
+    const result = await signup(parsed.data)
     setIsSubmitting(false)
 
     if (!result.success) {
-      setMessage(result.error || 'Google sign-up failed.')
+      setMessage(result.error || 'Signup failed.')
+      return
     }
+
+    setForm(initialFormState)
+    setMessage('Account created. Check your email if Supabase confirmation is enabled.')
   }
 
   return (
@@ -27,17 +53,59 @@ export default function SignupPage() {
         <CardHeader>
           <CardTitle className="text-2xl">Create student account</CardTitle>
           <p className="text-sm text-gray-600">
-            Sign up with your Google Mail account. Supabase will verify the account through Google,
-            so no email token is needed.
+            Sign up with gmail.com or an approved student email address.
           </p>
         </CardHeader>
         <CardContent>
-          <Button className="h-12 w-full gap-3 bg-white text-gray-900 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50" disabled={isSubmitting} onClick={handleGoogleSignIn}>
-            <span className="grid size-6 place-items-center rounded-full bg-blue-600 text-sm font-bold text-white">
-              G
-            </span>
-            {isSubmitting ? 'Opening Google...' : 'Continue with Google'}
-          </Button>
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="fullName">
+                Full name
+              </label>
+              <input
+                className="h-11 w-full rounded-md border border-gray-300 px-3 text-sm outline-none focus:border-blue-600"
+                id="fullName"
+                minLength={2}
+                onChange={(event) => setForm({ ...form, fullName: event.target.value })}
+                required
+                value={form.fullName}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="email">
+                Email
+              </label>
+              <input
+                className="h-11 w-full rounded-md border border-gray-300 px-3 text-sm outline-none focus:border-blue-600"
+                id="email"
+                onChange={(event) => setForm({ ...form, email: event.target.value })}
+                required
+                type="email"
+                value={form.email}
+              />
+              <p className="text-xs text-gray-500">Use gmail.com, gmail.se, or student mail.</p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium" htmlFor="password">
+                Password
+              </label>
+              <input
+                className="h-11 w-full rounded-md border border-gray-300 px-3 text-sm outline-none focus:border-blue-600"
+                id="password"
+                minLength={8}
+                onChange={(event) => setForm({ ...form, password: event.target.value })}
+                required
+                type="password"
+                value={form.password}
+              />
+            </div>
+
+            <Button className="w-full" disabled={isSubmitting} type="submit">
+              {isSubmitting ? 'Creating account...' : 'Sign Up'}
+            </Button>
+          </form>
 
           {message ? <p className="mt-4 text-sm text-gray-700">{message}</p> : null}
 

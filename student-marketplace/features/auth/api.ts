@@ -1,36 +1,47 @@
 import { isSupabaseConfigured, supabase } from '@/lib/supabase-client'
-import type { LoginInput } from '@/features/shared/types'
+import type { LoginInput, SignupInput } from '@/features/shared/types'
 
-export async function signInWithGoogle() {
+export async function signup(input: SignupInput) {
   if (!isSupabaseConfigured) {
     return { success: false, error: 'Supabase is not configured. Update .env.local first.' }
   }
 
   try {
-    const origin = window.location.origin
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
+    const { data, error } = await supabase.auth.signUp({
+      email: input.email,
+      password: input.password,
       options: {
-        redirectTo: origin,
-        queryParams: {
-          access_type: 'offline',
-          prompt: 'select_account',
+        data: {
+          full_name: input.fullName,
+          university: input.email.split('@')[1],
+          verified_student: true,
         },
       },
     })
 
     if (error) throw error
-    return { success: true, url: data.url }
+    return { success: true, user: data.user }
   } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Google sign-in failed',
-    }
+    return { success: false, error: error instanceof Error ? error.message : 'Signup failed' }
   }
 }
 
-export async function login(_input?: LoginInput) {
-  return signInWithGoogle()
+export async function login(input: LoginInput) {
+  if (!isSupabaseConfigured) {
+    return { success: false, error: 'Supabase is not configured. Update .env.local first.' }
+  }
+
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: input.email,
+      password: input.password,
+    })
+
+    if (error) throw error
+    return { success: true, user: data.user }
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'Login failed' }
+  }
 }
 
 export async function logout() {

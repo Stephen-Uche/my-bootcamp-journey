@@ -63,7 +63,7 @@ export default function HomePage() {
               </h1>
               <p className="max-w-xl text-lg leading-8 text-gray-700">
                 Buy and sell useful campus items with verified students. Start with a student
-                Google Mail account. No email token is required.
+                gmail.com account or approved student mail.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
