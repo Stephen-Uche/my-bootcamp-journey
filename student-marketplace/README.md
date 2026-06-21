@@ -103,6 +103,18 @@ alter table listings
 add column if not exists photos text[] default '{}';
 ```
 
+6. Make sure authenticated users can create their own profile row:
+
+```sql
+drop policy if exists "Profiles insertable by own user" on profiles;
+
+create policy "Profiles insertable by own user"
+on profiles
+for insert
+to authenticated
+with check (id = auth.uid());
+```
+
 ---
 
 ## Step 3: Understand the Shared Types and Validation Layer

@@ -4,6 +4,14 @@ import type { CreateListingInput, Listing } from '@/features/shared/types'
 
 const listingImagesBucket = 'listing-images'
 
+function getErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error) return error.message
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    return String((error as { message: unknown }).message)
+  }
+  return fallback
+}
+
 export async function uploadListingPhoto(file: File, sellerId: string) {
   if (!isSupabaseConfigured) {
     return { success: false, error: 'Supabase is not configured.' }
@@ -26,7 +34,7 @@ export async function uploadListingPhoto(file: File, sellerId: string) {
 
     return { success: true, url: data.publicUrl }
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to upload image'
+    const message = getErrorMessage(error, 'Failed to upload image')
     if (message.toLowerCase().includes('bucket not found')) {
       return {
         success: false,
@@ -125,7 +133,7 @@ export async function createListing(input: CreateListingInput & { seller_id: str
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to create listing',
+      error: getErrorMessage(error, 'Failed to create listing'),
     }
   }
 }

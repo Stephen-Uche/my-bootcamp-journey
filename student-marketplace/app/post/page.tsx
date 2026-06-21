@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { FormEvent, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getCurrentUser } from '@/features/auth/api'
+import { ensureCurrentUserProfile, getCurrentUser } from '@/features/auth/api'
 import { createListing, uploadListingPhoto } from '@/features/listings/api'
 import { createListingSchema } from '@/features/shared/types'
 
@@ -78,6 +78,13 @@ export default function PostPage() {
 
     setIsSubmitting(true)
 
+    const profileResult = await ensureCurrentUserProfile()
+    if (!profileResult.success) {
+      setIsSubmitting(false)
+      setMessage(profileResult.error || 'Failed to prepare your profile.')
+      return
+    }
+
     let imageUrl = ''
     if (imageFile) {
       const uploadResult = await uploadListingPhoto(imageFile, sellerId)
@@ -89,7 +96,11 @@ export default function PostPage() {
       imageUrl = uploadResult.url || ''
     }
 
-    const result = await createListing({ ...parsed.data, imageUrl, seller_id: sellerId })
+    const result = await createListing({
+      ...parsed.data,
+      imageUrl,
+      seller_id: profileResult.userId || sellerId,
+    })
     setIsSubmitting(false)
 
     if (!result.success) {
