@@ -32,7 +32,7 @@ export default function LoginPage() {
       return
     }
 
-    setMessage('Signed in successfully.')
+    window.location.href = '/profile?welcome=1'
   }
 
   return (

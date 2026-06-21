@@ -95,7 +95,8 @@ The post form uploads listing photos to Supabase Storage before creating the lis
 1. Open Supabase Dashboard.
 2. Go to `Storage`.
 3. Create a public bucket named `listing-images`.
-4. Make sure the `listings` table has a `photos` column:
+4. Mark the bucket as public so listing cards can render uploaded photos.
+5. Make sure the `listings` table has a `photos` column:
 
 ```sql
 alter table listings

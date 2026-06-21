@@ -26,9 +26,18 @@ export async function uploadListingPhoto(file: File, sellerId: string) {
 
     return { success: true, url: data.publicUrl }
   } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to upload image'
+    if (message.toLowerCase().includes('bucket not found')) {
+      return {
+        success: false,
+        error:
+          'Image upload bucket not found. Create a public Supabase Storage bucket named listing-images.',
+      }
+    }
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to upload image',
+      error: message,
     }
   }
 }

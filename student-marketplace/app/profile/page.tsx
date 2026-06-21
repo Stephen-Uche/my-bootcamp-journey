@@ -18,8 +18,12 @@ export default function ProfilePage() {
   const [user, setUser] = useState<ProfileUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [showWelcome, setShowWelcome] = useState(false)
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setShowWelcome(params.get('welcome') === '1')
+
     const loadUser = async () => {
       const authUser = await getCurrentUser()
 
@@ -85,6 +89,12 @@ export default function ProfilePage() {
         <h1 className="text-3xl font-bold">Profile</h1>
         <p className="mt-2 text-gray-600">Manage your student marketplace account.</p>
       </div>
+
+      {showWelcome ? (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-900">
+          Welcome back{user.fullName ? `, ${user.fullName}` : ''}. You are signed in.
+        </div>
+      ) : null}
 
       <Card>
         <CardHeader>
