@@ -97,11 +97,21 @@ export async function getListingById(id: string): Promise<Listing | null> {
   }
 
   try {
-    const { data, error } = await supabase.from('listings').select('*').eq('id', id).single()
+    const result = await supabase
+      .from('listings')
+      .select('*, seller:profiles(id, full_name, university)')
+      .eq('id', id)
+      .single()
 
+    if (!result.error) {
+      return result.data as Listing
+    }
+
+    const { data, error } = await supabase.from('listings').select('*').eq('id', id).single()
     if (error) throw error
     return data as Listing
-  } catch {
+  } catch (error) {
+    console.error('Failed to fetch listing:', error)
     return null
   }
 }
