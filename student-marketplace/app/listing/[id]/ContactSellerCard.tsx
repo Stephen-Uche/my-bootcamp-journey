@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/features/auth/api'
+import { updateListingStatus } from '@/features/listings/api'
 import { supabase } from '@/lib/supabase-client'
 
 type ContactSellerCardProps = {
@@ -26,8 +27,10 @@ export default function ContactSellerCard({
   const [user, setUser] = useState<CurrentUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isContactLoading, setIsContactLoading] = useState(false)
+  const [isMarkingSold, setIsMarkingSold] = useState(false)
   const [contactError, setContactError] = useState('')
   const [contactHref, setContactHref] = useState('')
+  const [statusMessage, setStatusMessage] = useState('')
 
   useEffect(() => {
     const loadUser = async () => {
@@ -75,6 +78,25 @@ export default function ContactSellerCard({
   }, [contactError, isContactLoading])
 
   const canContact = Boolean(contactHref) && !isContactLoading
+
+  const handleMarkSold = async () => {
+    if (!user || user.id !== sellerId) {
+      setStatusMessage('Only the seller can update this listing.')
+      return
+    }
+
+    setStatusMessage('')
+    setIsMarkingSold(true)
+    const result = await updateListingStatus(listingId, 'sold')
+    setIsMarkingSold(false)
+
+    if (!result.success) {
+      setStatusMessage(result.error || 'Failed to mark listing as sold.')
+      return
+    }
+
+    window.location.href = '/profile'
+  }
 
   if (isLoading) {
     return (
@@ -124,11 +146,20 @@ export default function ContactSellerCard({
               Edit Listing
             </Button>
           </Link>
+          <Button
+            className="w-full"
+            disabled={isMarkingSold}
+            onClick={handleMarkSold}
+            variant="outline"
+          >
+            {isMarkingSold ? 'Marking as sold...' : 'Mark as Sold'}
+          </Button>
           <Link href="/profile">
             <Button className="w-full" variant="outline">
               View Profile
             </Button>
           </Link>
+          {statusMessage ? <p className="text-sm text-gray-700">{statusMessage}</p> : null}
         </CardContent>
       </Card>
     )

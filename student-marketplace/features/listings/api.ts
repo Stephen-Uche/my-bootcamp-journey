@@ -157,6 +157,11 @@ export async function updateListing(
   }
 
   try {
+    const { data: userData, error: userError } = await supabase.auth.getUser()
+    if (userError || !userData.user) {
+      return { success: false, error: 'Sign in before updating this listing.' }
+    }
+
     const updatePayload: {
       title: string
       description: string
@@ -182,7 +187,7 @@ export async function updateListing(
       .from('listings')
       .update(updatePayload)
       .eq('id', id)
-      .eq('seller_id', input.seller_id)
+      .eq('seller_id', userData.user.id)
       .select()
       .single()
 
@@ -202,7 +207,18 @@ export async function updateListingStatus(id: string, status: 'available' | 'sol
   }
 
   try {
-    const { error } = await supabase.from('listings').update({ status }).eq('id', id)
+    const { data: userData, error: userError } = await supabase.auth.getUser()
+    if (userError || !userData.user) {
+      return { success: false, error: 'Sign in before updating this listing.' }
+    }
+
+    const { error } = await supabase
+      .from('listings')
+      .update({ status })
+      .eq('id', id)
+      .eq('seller_id', userData.user.id)
+      .select('id')
+      .single()
     if (error) throw error
     return { success: true }
   } catch (error) {
