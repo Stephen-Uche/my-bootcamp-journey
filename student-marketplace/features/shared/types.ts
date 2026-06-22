@@ -11,6 +11,12 @@ export const createListingSchema = z.object({
 
 export type CreateListingInput = z.infer<typeof createListingSchema>
 
+export const updateListingSchema = createListingSchema.extend({
+  status: z.enum(['available', 'sold', 'removed']),
+})
+
+export type UpdateListingInput = z.infer<typeof updateListingSchema>
+
 export interface Listing {
   id: string
   seller_id: string

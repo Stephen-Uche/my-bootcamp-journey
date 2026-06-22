@@ -1,6 +1,6 @@
 
 import { isSupabaseConfigured, supabase } from '@/lib/supabase-client'
-import type { CreateListingInput, Listing } from '@/features/shared/types'
+import type { CreateListingInput, Listing, UpdateListingInput } from '@/features/shared/types'
 
 const listingImagesBucket = 'listing-images'
 
@@ -144,6 +144,54 @@ export async function createListing(input: CreateListingInput & { seller_id: str
     return {
       success: false,
       error: getErrorMessage(error, 'Failed to create listing'),
+    }
+  }
+}
+
+export async function updateListing(
+  id: string,
+  input: UpdateListingInput & { seller_id: string }
+) {
+  if (!isSupabaseConfigured) {
+    return { success: false, error: 'Supabase is not configured.' }
+  }
+
+  try {
+    const updatePayload: {
+      title: string
+      description: string
+      category: string
+      price: number
+      condition: string
+      status: 'available' | 'sold' | 'removed'
+      photos?: string[]
+    } = {
+      title: input.title,
+      description: input.description,
+      category: input.category,
+      price: input.price,
+      condition: input.condition,
+      status: input.status,
+    }
+
+    if (input.imageUrl) {
+      updatePayload.photos = [input.imageUrl]
+    }
+
+    const { data, error } = await supabase
+      .from('listings')
+      .update(updatePayload)
+      .eq('id', id)
+      .eq('seller_id', input.seller_id)
+      .select()
+      .single()
+
+    if (error) throw error
+    return { success: true, listing: data as Listing }
+  } catch (error) {
+    return {
+      success: false,
+      error: getErrorMessage(error, 'Failed to update listing'),
     }
   }
 }

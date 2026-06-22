@@ -119,6 +119,11 @@ export default function ContactSellerCard({
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-gray-600">This item is listed from your account.</p>
+          <Link href={`/listing/${listingId}/edit`}>
+            <Button className="w-full">
+              Edit Listing
+            </Button>
+          </Link>
           <Link href="/profile">
             <Button className="w-full" variant="outline">
               View Profile
