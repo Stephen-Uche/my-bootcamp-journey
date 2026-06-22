@@ -23,6 +23,7 @@ export interface Listing {
   photos: string[]
   seller: {
     id: string
+    email?: string
     full_name: string
     university: string
   }

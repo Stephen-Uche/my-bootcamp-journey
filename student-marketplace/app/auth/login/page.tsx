@@ -13,6 +13,15 @@ export default function LoginPage() {
   const [message, setMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const getRedirectPath = () => {
+    const redirect = new URLSearchParams(window.location.search).get('redirect')
+    if (!redirect || !redirect.startsWith('/') || redirect.startsWith('//')) {
+      return '/profile?welcome=1'
+    }
+
+    return redirect
+  }
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setMessage('')
@@ -32,7 +41,7 @@ export default function LoginPage() {
       return
     }
 
-    window.location.href = '/profile?welcome=1'
+    window.location.href = getRedirectPath()
   }
 
   return (

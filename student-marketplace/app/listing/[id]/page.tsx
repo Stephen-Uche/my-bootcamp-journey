@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getListingById } from '@/features/listings/api'
+import ContactSellerCard from './ContactSellerCard'
 
 type ListingDetailPageProps = {
   params: {
@@ -108,13 +109,14 @@ export default async function ListingDetailPage({ params }: ListingDetailPagePro
                   </p>
                 </div>
               </div>
-              <Link href="/auth/login">
-                <Button className="w-full" size="lg">
-                  Sign in to contact seller
-                </Button>
-              </Link>
             </CardContent>
           </Card>
+
+          <ContactSellerCard
+            listingId={listing.id}
+            listingTitle={listing.title}
+            sellerId={listing.seller_id}
+          />
 
           <Card>
             <CardHeader>

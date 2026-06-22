@@ -99,7 +99,7 @@ export async function getListingById(id: string): Promise<Listing | null> {
   try {
     const result = await supabase
       .from('listings')
-      .select('*, seller:profiles(id, full_name, university)')
+      .select('*, seller:profiles(id, email, full_name, university)')
       .eq('id', id)
       .single()
 
