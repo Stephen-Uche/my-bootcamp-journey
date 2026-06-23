@@ -142,17 +142,22 @@ export async function getMyListings(): Promise<Listing[]> {
   }
 }
 
-export async function createListing(input: CreateListingInput & { seller_id: string }) {
+export async function createListing(input: CreateListingInput) {
   if (!isSupabaseConfigured) {
     return { success: false, error: 'Supabase is not configured.' }
   }
 
   try {
+    const { data: userData, error: userError } = await supabase.auth.getUser()
+    if (userError || !userData.user) {
+      return { success: false, error: 'Sign in before creating a listing.' }
+    }
+
     const { data, error } = await supabase
       .from('listings')
       .insert([
         {
-          seller_id: input.seller_id,
+          seller_id: userData.user.id,
           title: input.title,
           description: input.description,
           category: input.category,

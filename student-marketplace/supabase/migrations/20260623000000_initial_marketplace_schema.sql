@@ -13,6 +13,74 @@ create table if not exists public.profiles (
   updated_at timestamptz not null default now()
 );
 
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.profiles (
+    id,
+    email,
+    full_name,
+    university,
+    verified_student
+  )
+  values (
+    new.id,
+    new.email,
+    nullif(new.raw_user_meta_data ->> 'full_name', ''),
+    coalesce(nullif(new.raw_user_meta_data ->> 'university', ''), split_part(new.email, '@', 2)),
+    case
+      when new.raw_user_meta_data ->> 'verified_student' in ('true', 'false')
+        then (new.raw_user_meta_data ->> 'verified_student')::boolean
+      else false
+    end
+  )
+  on conflict (id) do update
+  set
+    email = excluded.email,
+    full_name = coalesce(excluded.full_name, public.profiles.full_name),
+    university = coalesce(excluded.university, public.profiles.university),
+    verified_student = public.profiles.verified_student or excluded.verified_student;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+after insert on auth.users
+for each row
+execute function public.handle_new_user();
+
+insert into public.profiles (
+  id,
+  email,
+  full_name,
+  university,
+  verified_student
+)
+select
+  auth_user.id,
+  auth_user.email,
+  nullif(auth_user.raw_user_meta_data ->> 'full_name', ''),
+  coalesce(nullif(auth_user.raw_user_meta_data ->> 'university', ''), split_part(auth_user.email, '@', 2)),
+  case
+    when auth_user.raw_user_meta_data ->> 'verified_student' in ('true', 'false')
+      then (auth_user.raw_user_meta_data ->> 'verified_student')::boolean
+    else false
+  end
+from auth.users as auth_user
+where auth_user.email is not null
+on conflict (id) do update
+set
+  email = excluded.email,
+  full_name = coalesce(excluded.full_name, public.profiles.full_name),
+  university = coalesce(excluded.university, public.profiles.university),
+  verified_student = public.profiles.verified_student or excluded.verified_student;
+
 create table if not exists public.listings (
   id uuid primary key default gen_random_uuid(),
   seller_id uuid not null references public.profiles(id) on delete cascade,
@@ -69,13 +137,6 @@ on public.profiles
 for select
 to authenticated
 using (id = auth.uid());
-
-drop policy if exists "Profiles insertable by own user" on public.profiles;
-create policy "Profiles insertable by own user"
-on public.profiles
-for insert
-to authenticated
-with check (id = auth.uid());
 
 drop policy if exists "Profiles updatable by owner" on public.profiles;
 create policy "Profiles updatable by owner"

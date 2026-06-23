@@ -108,9 +108,10 @@ supabase db push
 
 Or open Supabase Dashboard -> SQL Editor and run the migration file contents.
 
-The migration creates `profiles`, `listings`, listing status values, the public
-`listing-images` bucket, and RLS policies for public browsing, seller-owned
-listing management, profile ownership, and image uploads.
+The migration creates `profiles`, `listings`, a database trigger that creates a
+profile row when a Supabase Auth user is created, listing status values, the
+public `listing-images` bucket, and RLS policies for public browsing,
+seller-owned listing management, profile ownership, and image uploads.
 
 ---
 
