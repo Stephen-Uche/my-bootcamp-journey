@@ -126,6 +126,9 @@ export default function ProfilePage() {
             <Link href="/post">
               <Button>Post Item</Button>
             </Link>
+            <Link href="/my-listings">
+              <Button variant="outline">My Listings</Button>
+            </Link>
             <Link href="/browse">
               <Button variant="outline">Browse Listings</Button>
             </Link>

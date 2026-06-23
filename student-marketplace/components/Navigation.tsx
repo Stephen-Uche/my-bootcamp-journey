@@ -58,6 +58,9 @@ export function Navigation() {
               <Link href="/post">
                 <Button>Post Item</Button>
               </Link>
+              <Link href="/my-listings">
+                <Button variant="ghost">My Listings</Button>
+              </Link>
               <Link href="/profile">
                 <Button variant="outline">{user.email?.split('@')[0]}</Button>
               </Link>

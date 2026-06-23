@@ -116,6 +116,32 @@ export async function getListingById(id: string): Promise<Listing | null> {
   }
 }
 
+export async function getMyListings(): Promise<Listing[]> {
+  if (!isSupabaseConfigured) {
+    console.warn('Supabase is not configured. Update NEXT_PUBLIC_SUPABASE_URL in .env.local.')
+    return []
+  }
+
+  try {
+    const { data: userData, error: userError } = await supabase.auth.getUser()
+    if (userError || !userData.user) {
+      return []
+    }
+
+    const { data, error } = await supabase
+      .from('listings')
+      .select('*')
+      .eq('seller_id', userData.user.id)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return (data || []) as Listing[]
+  } catch (error) {
+    console.error('Failed to fetch seller listings:', error)
+    return []
+  }
+}
+
 export async function createListing(input: CreateListingInput & { seller_id: string }) {
   if (!isSupabaseConfigured) {
     return { success: false, error: 'Supabase is not configured.' }
