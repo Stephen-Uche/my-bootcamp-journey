@@ -75,7 +75,9 @@ The Supabase client is configured in:
 lib/supabase-client.ts
 ```
 
-The app requires `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to start. `SUPABASE_SERVICE_ROLE_KEY` is optional in the current code because the server client falls back to the anon key.
+The app requires `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to start.
+`SUPABASE_SERVICE_ROLE_KEY` is required for server-side flows that read protected data, such
+as the authenticated seller contact endpoint.
 
 ### Configure email sign-in
 
@@ -92,28 +94,23 @@ If Supabase email confirmation is enabled, new users must confirm their email be
 
 The post form uploads listing photos to Supabase Storage before creating the listing.
 
-1. Open Supabase Dashboard.
-2. Go to `Storage`.
-3. Create a public bucket named `listing-images`.
-4. Mark the bucket as public so listing cards can render uploaded photos.
-5. Make sure the `listings` table has a `photos` column:
+The schema, row-level security policies, and `listing-images` storage bucket are versioned in:
 
-```sql
-alter table listings
-add column if not exists photos text[] default '{}';
+```text
+supabase/migrations/20260623000000_initial_marketplace_schema.sql
 ```
 
-6. Make sure authenticated users can create their own profile row:
+Apply it with the Supabase CLI from the project root:
 
-```sql
-drop policy if exists "Profiles insertable by own user" on profiles;
-
-create policy "Profiles insertable by own user"
-on profiles
-for insert
-to authenticated
-with check (id = auth.uid());
+```bash
+supabase db push
 ```
+
+Or open Supabase Dashboard -> SQL Editor and run the migration file contents.
+
+The migration creates `profiles`, `listings`, listing status values, the public
+`listing-images` bucket, and RLS policies for public browsing, seller-owned
+listing management, profile ownership, and image uploads.
 
 ---
 
