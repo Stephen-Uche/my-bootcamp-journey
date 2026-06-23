@@ -72,6 +72,14 @@ export const loginSchema = z.object({
 
 export type LoginInput = z.infer<typeof loginSchema>
 
+export const feedbackSchema = z.object({
+  rating: z.number().int().min(1, 'Choose a rating').max(5, 'Choose a rating'),
+  category: z.enum(['bug', 'idea', 'marketplace', 'account', 'other']),
+  message: z.string().min(10, 'Feedback must be at least 10 characters').max(1500),
+})
+
+export type FeedbackInput = z.infer<typeof feedbackSchema>
+
 export interface User {
   id: string
   email: string
@@ -80,4 +88,15 @@ export interface User {
   verified_student: boolean
   role: 'student' | 'admin'
   created_at: string
+}
+
+export interface UserFeedback {
+  id: string
+  user_id: string
+  rating: number
+  category: 'bug' | 'idea' | 'marketplace' | 'account' | 'other'
+  message: string
+  status: 'new' | 'reviewed' | 'resolved'
+  created_at: string
+  updated_at: string
 }

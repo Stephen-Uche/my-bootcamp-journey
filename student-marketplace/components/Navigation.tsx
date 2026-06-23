@@ -58,6 +58,9 @@ export function Navigation() {
           <Link href="/browse">
             <Button variant="ghost">Browse</Button>
           </Link>
+          <Link href="/feedback">
+            <Button variant="ghost">Feedback</Button>
+          </Link>
 
           {loading ? (
             <div className="text-sm text-gray-500">Loading...</div>

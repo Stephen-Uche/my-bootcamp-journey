@@ -139,6 +139,17 @@ create table if not exists public.listings (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.user_feedback (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  rating integer not null check (rating between 1 and 5),
+  category text not null check (category in ('bug', 'idea', 'marketplace', 'account', 'other')),
+  message text not null check (char_length(message) between 10 and 1500),
+  status text not null default 'new' check (status in ('new', 'reviewed', 'resolved')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
@@ -167,6 +178,12 @@ before update on public.listings
 for each row
 execute function public.set_updated_at();
 
+drop trigger if exists user_feedback_set_updated_at on public.user_feedback;
+create trigger user_feedback_set_updated_at
+before update on public.user_feedback
+for each row
+execute function public.set_updated_at();
+
 create index if not exists listings_available_created_at_idx
 on public.listings (created_at desc)
 where status = 'available';
@@ -178,8 +195,15 @@ create index if not exists listings_category_idx
 on public.listings (category)
 where status = 'available';
 
+create index if not exists user_feedback_user_created_at_idx
+on public.user_feedback (user_id, created_at desc);
+
+create index if not exists user_feedback_status_created_at_idx
+on public.user_feedback (status, created_at desc);
+
 alter table public.profiles enable row level security;
 alter table public.listings enable row level security;
+alter table public.user_feedback enable row level security;
 
 drop policy if exists "Profiles readable by owner" on public.profiles;
 create policy "Profiles readable by owner"
@@ -239,6 +263,28 @@ on public.listings
 for delete
 to authenticated
 using (seller_id = auth.uid());
+
+drop policy if exists "Users can create own feedback" on public.user_feedback;
+create policy "Users can create own feedback"
+on public.user_feedback
+for insert
+to authenticated
+with check (user_id = auth.uid());
+
+drop policy if exists "Users can read own feedback" on public.user_feedback;
+create policy "Users can read own feedback"
+on public.user_feedback
+for select
+to authenticated
+using (user_id = auth.uid() or public.is_admin(auth.uid()));
+
+drop policy if exists "Admins can update feedback" on public.user_feedback;
+create policy "Admins can update feedback"
+on public.user_feedback
+for update
+to authenticated
+using (public.is_admin(auth.uid()))
+with check (public.is_admin(auth.uid()));
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (
