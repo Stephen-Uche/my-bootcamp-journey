@@ -28,6 +28,7 @@ export default function ContactSellerCard({
   const [isLoading, setIsLoading] = useState(true)
   const [isContactLoading, setIsContactLoading] = useState(false)
   const [isMarkingSold, setIsMarkingSold] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [contactError, setContactError] = useState('')
   const [contactHref, setContactHref] = useState('')
   const [statusMessage, setStatusMessage] = useState('')
@@ -98,6 +99,33 @@ export default function ContactSellerCard({
     window.location.href = '/profile'
   }
 
+  const handleDelete = async () => {
+    if (!user || user.id !== sellerId) {
+      setStatusMessage('Only the seller can delete this listing.')
+      return
+    }
+
+    const confirmed = window.confirm(
+      'Delete this listing? It will be removed from browse and listing pages.'
+    )
+
+    if (!confirmed) {
+      return
+    }
+
+    setStatusMessage('')
+    setIsDeleting(true)
+    const result = await updateListingStatus(listingId, 'removed')
+    setIsDeleting(false)
+
+    if (!result.success) {
+      setStatusMessage(result.error || 'Failed to delete listing.')
+      return
+    }
+
+    window.location.href = '/profile'
+  }
+
   if (isLoading) {
     return (
       <Card>
@@ -148,11 +176,19 @@ export default function ContactSellerCard({
           </Link>
           <Button
             className="w-full"
-            disabled={isMarkingSold}
+            disabled={isMarkingSold || isDeleting}
             onClick={handleMarkSold}
             variant="outline"
           >
             {isMarkingSold ? 'Marking as sold...' : 'Mark as Sold'}
+          </Button>
+          <Button
+            className="w-full border-red-200 text-red-700 hover:bg-red-50"
+            disabled={isMarkingSold || isDeleting}
+            onClick={handleDelete}
+            variant="outline"
+          >
+            {isDeleting ? 'Deleting...' : 'Delete Listing'}
           </Button>
           <Link href="/profile">
             <Button className="w-full" variant="outline">
