@@ -78,5 +78,6 @@ export interface User {
   full_name: string
   university: string
   verified_student: boolean
+  role: 'student' | 'admin'
   created_at: string
 }
