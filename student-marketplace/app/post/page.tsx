@@ -80,7 +80,7 @@ export default function PostPage() {
 
     let imageUrl = ''
     if (imageFile) {
-      const uploadResult = await uploadListingPhoto(imageFile, sellerId)
+      const uploadResult = await uploadListingPhoto(imageFile)
       if (!uploadResult.success) {
         setIsSubmitting(false)
         setMessage(uploadResult.error || 'Failed to upload image.')

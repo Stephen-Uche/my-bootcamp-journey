@@ -1,6 +1,7 @@
 
 import { isSupabaseConfigured, supabase } from '@/lib/supabase-client'
 import type { CreateListingInput, Listing, UpdateListingInput } from '@/features/shared/types'
+import { getCurrentUserProfile } from '@/features/auth/api'
 
 const listingImagesBucket = 'listing-images'
 
@@ -12,14 +13,19 @@ function getErrorMessage(error: unknown, fallback: string) {
   return fallback
 }
 
-export async function uploadListingPhoto(file: File, sellerId: string) {
+export async function uploadListingPhoto(file: File) {
   if (!isSupabaseConfigured) {
     return { success: false, error: 'Supabase is not configured.' }
   }
 
   try {
+    const { data: userData, error: userError } = await supabase.auth.getUser()
+    if (userError || !userData.user) {
+      return { success: false, error: 'Sign in before uploading listing images.' }
+    }
+
     const extension = file.name.split('.').pop() || 'jpg'
-    const filePath = `${sellerId}/${crypto.randomUUID()}.${extension}`
+    const filePath = `${userData.user.id}/${crypto.randomUUID()}.${extension}`
     const { error } = await supabase.storage
       .from(listingImagesBucket)
       .upload(filePath, file, {
@@ -39,7 +45,7 @@ export async function uploadListingPhoto(file: File, sellerId: string) {
       return {
         success: false,
         error:
-          'Image upload bucket not found. Create a public Supabase Storage bucket named listing-images.',
+          'Image upload bucket not found. Apply the Supabase migration to create listing-images.',
       }
     }
 
@@ -138,6 +144,31 @@ export async function getMyListings(): Promise<Listing[]> {
     return (data || []) as Listing[]
   } catch (error) {
     console.error('Failed to fetch seller listings:', error)
+    return []
+  }
+}
+
+export async function getModerationListings(): Promise<Listing[]> {
+  if (!isSupabaseConfigured) {
+    console.warn('Supabase is not configured. Update NEXT_PUBLIC_SUPABASE_URL in .env.local.')
+    return []
+  }
+
+  try {
+    const profile = await getCurrentUserProfile()
+    if (profile?.role !== 'admin') {
+      return []
+    }
+
+    const { data, error } = await supabase
+      .from('listings')
+      .select('*, seller:profiles(id, email, full_name, university)')
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return (data || []) as Listing[]
+  } catch (error) {
+    console.error('Failed to fetch moderation listings:', error)
     return []
   }
 }
@@ -250,6 +281,37 @@ export async function updateListingStatus(id: string, status: 'available' | 'sol
       .eq('seller_id', userData.user.id)
       .select('id')
       .single()
+    if (error) throw error
+    return { success: true }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to update listing',
+    }
+  }
+}
+
+export async function updateListingModerationStatus(
+  id: string,
+  status: 'available' | 'sold' | 'removed'
+) {
+  if (!isSupabaseConfigured) {
+    return { success: false, error: 'Supabase is not configured.' }
+  }
+
+  try {
+    const profile = await getCurrentUserProfile()
+    if (profile?.role !== 'admin') {
+      return { success: false, error: 'Admin access required.' }
+    }
+
+    const { error } = await supabase
+      .from('listings')
+      .update({ status })
+      .eq('id', id)
+      .select('id')
+      .single()
+
     if (error) throw error
     return { success: true }
   } catch (error) {

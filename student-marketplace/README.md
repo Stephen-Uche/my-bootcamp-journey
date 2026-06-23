@@ -92,7 +92,8 @@ If Supabase email confirmation is enabled, new users must confirm their email be
 
 ### Configure listing image uploads
 
-The post form uploads listing photos to Supabase Storage before creating the listing.
+The post and edit forms upload listing photos to Supabase Storage. The storage bucket is
+created by the migration, so it does not need separate manual setup in the Storage dashboard.
 
 The schema, row-level security policies, and `listing-images` storage bucket are versioned in:
 
@@ -112,6 +113,26 @@ The migration creates `profiles`, `listings`, a database trigger that creates a
 profile row when a Supabase Auth user is created, listing status values, the
 public `listing-images` bucket, and RLS policies for public browsing,
 seller-owned listing management, profile ownership, and image uploads.
+
+### Configure admin moderation
+
+Moderation is available at:
+
+```text
+/admin/moderation
+```
+
+The first admin must be promoted from the Supabase SQL Editor after their account exists:
+
+```sql
+update public.profiles
+set role = 'admin'
+where email = 'admin@example.com';
+```
+
+Admins can review all listings and restore or remove listings. The migration includes
+RLS policies for admin moderation and a database trigger that prevents non-admin users
+from promoting themselves by updating their own profile role.
 
 ---
 

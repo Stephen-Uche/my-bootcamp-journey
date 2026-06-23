@@ -3,11 +3,12 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { logout } from '@/features/auth/api'
+import { getCurrentUserProfile, logout } from '@/features/auth/api'
 import { supabase } from '@/lib/supabase-client'
 
 type AuthUser = {
   email?: string | null
+  role?: 'student' | 'admin'
 }
 
 export function Navigation() {
@@ -18,7 +19,14 @@ export function Navigation() {
   useEffect(() => {
     const getUser = async () => {
       const { data } = await supabase.auth.getUser()
-      setUser(data?.user || null)
+      if (!data?.user) {
+        setUser(null)
+        setLoading(false)
+        return
+      }
+
+      const profile = await getCurrentUserProfile()
+      setUser({ email: data.user.email, role: profile?.role || 'student' })
       setLoading(false)
     }
 
@@ -61,6 +69,11 @@ export function Navigation() {
               <Link href="/my-listings">
                 <Button variant="ghost">My Listings</Button>
               </Link>
+              {user.role === 'admin' ? (
+                <Link href="/admin/moderation">
+                  <Button variant="ghost">Admin</Button>
+                </Link>
+              ) : null}
               <Link href="/profile">
                 <Button variant="outline">{user.email?.split('@')[0]}</Button>
               </Link>

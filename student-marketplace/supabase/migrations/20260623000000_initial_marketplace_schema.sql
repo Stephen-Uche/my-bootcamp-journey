@@ -9,9 +9,19 @@ create table if not exists public.profiles (
   full_name text,
   university text,
   verified_student boolean not null default false,
+  role text not null default 'student' check (role in ('student', 'admin')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.profiles
+add column if not exists role text not null default 'student';
+
+alter table public.profiles
+drop constraint if exists profiles_role_check;
+
+alter table public.profiles
+add constraint profiles_role_check check (role in ('student', 'admin'));
 
 create or replace function public.handle_new_user()
 returns trigger
@@ -25,7 +35,8 @@ begin
     email,
     full_name,
     university,
-    verified_student
+    verified_student,
+    role
   )
   values (
     new.id,
@@ -36,7 +47,8 @@ begin
       when new.raw_user_meta_data ->> 'verified_student' in ('true', 'false')
         then (new.raw_user_meta_data ->> 'verified_student')::boolean
       else false
-    end
+    end,
+    'student'
   )
   on conflict (id) do update
   set
@@ -60,7 +72,8 @@ insert into public.profiles (
   email,
   full_name,
   university,
-  verified_student
+  verified_student,
+  role
 )
 select
   auth_user.id,
@@ -71,7 +84,8 @@ select
     when auth_user.raw_user_meta_data ->> 'verified_student' in ('true', 'false')
       then (auth_user.raw_user_meta_data ->> 'verified_student')::boolean
     else false
-  end
+  end,
+  'student'
 from auth.users as auth_user
 where auth_user.email is not null
 on conflict (id) do update
@@ -80,6 +94,36 @@ set
   full_name = coalesce(excluded.full_name, public.profiles.full_name),
   university = coalesce(excluded.university, public.profiles.university),
   verified_student = public.profiles.verified_student or excluded.verified_student;
+
+create or replace function public.is_admin(user_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (
+    select 1
+    from public.profiles
+    where id = user_id
+      and role = 'admin'
+  );
+$$;
+
+create or replace function public.prevent_profile_role_self_escalation()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if old.role is distinct from new.role and auth.uid() is not null and not public.is_admin(auth.uid()) then
+    raise exception 'Only admins can change profile roles.';
+  end if;
+
+  return new;
+end;
+$$;
 
 create table if not exists public.listings (
   id uuid primary key default gen_random_uuid(),
@@ -111,6 +155,12 @@ before update on public.profiles
 for each row
 execute function public.set_updated_at();
 
+drop trigger if exists profiles_prevent_role_self_escalation on public.profiles;
+create trigger profiles_prevent_role_self_escalation
+before update on public.profiles
+for each row
+execute function public.prevent_profile_role_self_escalation();
+
 drop trigger if exists listings_set_updated_at on public.listings;
 create trigger listings_set_updated_at
 before update on public.listings
@@ -136,7 +186,7 @@ create policy "Profiles readable by owner"
 on public.profiles
 for select
 to authenticated
-using (id = auth.uid());
+using (id = auth.uid() or public.is_admin(auth.uid()));
 
 drop policy if exists "Profiles updatable by owner" on public.profiles;
 create policy "Profiles updatable by owner"
@@ -145,6 +195,14 @@ for update
 to authenticated
 using (id = auth.uid())
 with check (id = auth.uid());
+
+drop policy if exists "Profiles updatable by admins" on public.profiles;
+create policy "Profiles updatable by admins"
+on public.profiles
+for update
+to authenticated
+using (public.is_admin(auth.uid()))
+with check (public.is_admin(auth.uid()));
 
 drop policy if exists "Available listings readable by everyone" on public.listings;
 create policy "Available listings readable by everyone"
@@ -158,7 +216,7 @@ create policy "Sellers can read own listings"
 on public.listings
 for select
 to authenticated
-using (seller_id = auth.uid());
+using (seller_id = auth.uid() or public.is_admin(auth.uid()));
 
 drop policy if exists "Sellers can create own listings" on public.listings;
 create policy "Sellers can create own listings"
@@ -172,8 +230,8 @@ create policy "Sellers can update own listings"
 on public.listings
 for update
 to authenticated
-using (seller_id = auth.uid())
-with check (seller_id = auth.uid());
+using (seller_id = auth.uid() or public.is_admin(auth.uid()))
+with check (seller_id = auth.uid() or public.is_admin(auth.uid()));
 
 drop policy if exists "Sellers can delete own listings" on public.listings;
 create policy "Sellers can delete own listings"

@@ -117,7 +117,7 @@ export default function EditListingPage({ params }: EditListingPageProps) {
 
     let imageUrl = ''
     if (imageFile) {
-      const uploadResult = await uploadListingPhoto(imageFile, sellerId)
+      const uploadResult = await uploadListingPhoto(imageFile)
       if (!uploadResult.success) {
         setIsSubmitting(false)
         setMessage(uploadResult.error || 'Failed to upload image.')

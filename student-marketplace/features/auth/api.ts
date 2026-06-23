@@ -1,5 +1,5 @@
 import { isSupabaseConfigured, supabase } from '@/lib/supabase-client'
-import type { LoginInput, SignupInput } from '@/features/shared/types'
+import type { LoginInput, SignupInput, User } from '@/features/shared/types'
 
 export async function signup(input: SignupInput) {
   if (!isSupabaseConfigured) {
@@ -67,6 +67,28 @@ export async function getCurrentUser() {
     const { data, error } = await supabase.auth.getUser()
     if (error || !data.user) return null
     return data.user
+  } catch {
+    return null
+  }
+}
+
+export async function getCurrentUserProfile(): Promise<User | null> {
+  if (!isSupabaseConfigured) {
+    return null
+  }
+
+  try {
+    const { data: userData, error: userError } = await supabase.auth.getUser()
+    if (userError || !userData.user) return null
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userData.user.id)
+      .single()
+
+    if (error || !data) return null
+    return data as User
   } catch {
     return null
   }
