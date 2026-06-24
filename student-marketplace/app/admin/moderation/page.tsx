@@ -156,17 +156,17 @@ export default function ModerationPage() {
         ) : (
           filteredListings.map((listing) => (
             <Card key={listing.id}>
-              <div className="grid gap-4 p-4 lg:grid-cols-[160px_1fr_auto]">
-                <div className="overflow-hidden rounded-lg bg-gray-100">
+              <div className="grid gap-4 p-4 sm:grid-cols-[160px_1fr] lg:grid-cols-[180px_1fr_auto]">
+                <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-lg bg-gray-100">
                   {listing.photos?.[0] ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                       alt={listing.title}
-                      className="aspect-[4/3] h-full w-full object-cover"
+                      className="max-h-full max-w-full object-contain"
                       src={listing.photos[0]}
                     />
                   ) : (
-                    <div className="flex aspect-[4/3] items-center justify-center text-sm text-gray-500">
+                    <div className="text-sm text-gray-500">
                       No photo
                     </div>
                   )}
@@ -198,7 +198,7 @@ export default function ModerationPage() {
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-2 lg:w-36">
+                <div className="flex flex-col gap-2 sm:col-span-2 lg:col-span-1 lg:w-36">
                   {listing.status === 'available' ? (
                     <Link href={`/listing/${listing.id}`}>
                       <Button className="w-full" variant="outline">

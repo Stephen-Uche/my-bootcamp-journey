@@ -24,16 +24,16 @@ async function ListingsGrid() {
         <Link key={listing.id} href={`/listing/${listing.id}`}>
           <Card className="cursor-pointer transition hover:border-sky-300 hover:shadow-md">
             <div className="grid gap-4 p-4 sm:grid-cols-[140px_1fr_auto] sm:items-center">
-              <div className="overflow-hidden rounded-md bg-slate-100">
+              <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-md bg-slate-100">
                 {listing.photos?.[0] ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     alt={listing.title}
-                    className="aspect-[4/3] h-full w-full object-cover"
+                    className="max-h-full max-w-full object-contain"
                     src={listing.photos[0]}
                   />
                 ) : (
-                  <div className="flex aspect-[4/3] items-center justify-center text-sm text-slate-500">
+                  <div className="text-sm text-slate-500">
                     No photo
                   </div>
                 )}

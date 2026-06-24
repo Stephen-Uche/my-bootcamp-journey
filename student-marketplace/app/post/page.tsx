@@ -216,11 +216,11 @@ export default function PostPage() {
                 </div>
               ) : null}
               {imagePreviewUrl ? (
-                <div className="overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+                <div className="flex h-56 items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     alt="Listing preview"
-                    className="h-48 w-full object-cover"
+                    className="max-h-full max-w-full object-contain"
                     src={imagePreviewUrl}
                   />
                 </div>

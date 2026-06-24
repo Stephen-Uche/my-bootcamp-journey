@@ -48,11 +48,11 @@ export default async function ListingDetailPage({ params }: ListingDetailPagePro
       <section className="grid gap-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
         <div className="space-y-4">
           {photos[0] ? (
-            <div className="overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
+            <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt={listing.title}
-                className="aspect-[4/3] w-full object-cover"
+                className="max-h-full max-w-full object-contain"
                 src={photos[0]}
               />
             </div>
@@ -66,13 +66,13 @@ export default async function ListingDetailPage({ params }: ListingDetailPagePro
             <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
               {photos.slice(1, 5).map((photo, index) => (
                 <div
-                  className="overflow-hidden rounded-lg border border-gray-200 bg-gray-100"
+                  className="flex aspect-square items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-100"
                   key={photo}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     alt={`${listing.title} photo ${index + 2}`}
-                    className="aspect-square w-full object-cover"
+                    className="max-h-full max-w-full object-contain"
                     src={photo}
                   />
                 </div>
