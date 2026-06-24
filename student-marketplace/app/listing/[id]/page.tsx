@@ -52,7 +52,7 @@ export default async function ListingDetailPage({ params }: ListingDetailPagePro
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 alt={listing.title}
-                className="max-h-full max-w-full object-contain"
+                className="h-full w-full object-contain"
                 src={photos[0]}
               />
             </div>
@@ -72,7 +72,7 @@ export default async function ListingDetailPage({ params }: ListingDetailPagePro
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     alt={`${listing.title} photo ${index + 2}`}
-                    className="max-h-full max-w-full object-contain"
+                    className="h-full w-full object-contain"
                     src={photo}
                   />
                 </div>

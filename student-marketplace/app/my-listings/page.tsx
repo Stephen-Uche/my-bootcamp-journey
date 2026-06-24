@@ -153,7 +153,7 @@ export default function MyListingsPage() {
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                       alt={listing.title}
-                      className="max-h-full max-w-full object-contain"
+                      className="h-full w-full object-contain"
                       src={listing.photos[0]}
                     />
                   ) : (
