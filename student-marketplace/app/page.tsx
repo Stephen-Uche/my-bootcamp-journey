@@ -19,35 +19,41 @@ async function ListingsGrid() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="space-y-3">
       {listings.map((listing) => (
         <Link key={listing.id} href={`/listing/${listing.id}`}>
-          <Card className="cursor-pointer transition-shadow hover:shadow-lg">
-            {listing.photos?.[0] ? (
-              <div className="aspect-[4/3] overflow-hidden rounded-t-lg bg-gray-100">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  alt={listing.title}
-                  className="h-full w-full object-cover transition-transform hover:scale-105"
-                  src={listing.photos[0]}
-                />
+          <Card className="cursor-pointer transition hover:border-sky-300 hover:shadow-md">
+            <div className="grid gap-4 p-4 sm:grid-cols-[140px_1fr_auto] sm:items-center">
+              <div className="overflow-hidden rounded-md bg-slate-100">
+                {listing.photos?.[0] ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    alt={listing.title}
+                    className="aspect-[4/3] h-full w-full object-cover"
+                    src={listing.photos[0]}
+                  />
+                ) : (
+                  <div className="flex aspect-[4/3] items-center justify-center text-sm text-slate-500">
+                    No photo
+                  </div>
+                )}
               </div>
-            ) : null}
-            <CardHeader>
-              <CardTitle className="line-clamp-2 text-lg">{listing.title}</CardTitle>
-              <p className="text-sm text-gray-500">{listing.category}</p>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <span className="text-2xl font-bold text-blue-600">
-                  SEK {listing.price.toFixed(0)}
-                </span>
-                <span className="rounded-full bg-gray-100 px-3 py-1 text-sm capitalize">
-                  {listing.condition}
-                </span>
+              <div className="min-w-0">
+                <CardTitle className="line-clamp-1 text-lg">{listing.title}</CardTitle>
+                <p className="mt-1 text-sm capitalize text-slate-500">
+                  {listing.category} · {listing.condition}
+                </p>
+                <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">
+                  {listing.description}
+                </p>
               </div>
-              <p className="mt-3 line-clamp-2 text-sm text-gray-600">{listing.description}</p>
-            </CardContent>
+              <div className="text-left sm:text-right">
+                <p className="text-2xl font-bold text-sky-700">SEK {listing.price.toFixed(0)}</p>
+                <p className="mt-1 text-xs font-medium uppercase tracking-wide text-emerald-700">
+                  Available
+                </p>
+              </div>
+            </div>
           </Card>
         </Link>
       ))}
@@ -57,58 +63,91 @@ async function ListingsGrid() {
 
 export default function HomePage() {
   return (
-    <div className="space-y-12">
-      <section className="relative -mx-4 -mt-8 min-h-[560px] overflow-hidden bg-[url('/images/student-marketplace-hero.png')] bg-cover bg-center md:rounded-b-2xl">
-        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-white/25" />
-        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-gray-50 to-transparent" />
-
-        <div className="relative mx-auto flex min-h-[560px] max-w-7xl items-center px-4 py-16">
-          <div className="max-w-2xl space-y-7">
-            <div className="inline-flex rounded-full bg-emerald-100 px-4 py-2 text-sm font-medium text-emerald-800 shadow-sm">
-              Student deals for dorm life, books, furniture, and tech
+    <div className="space-y-10">
+      <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="overflow-hidden rounded-md border border-slate-300 bg-white shadow-sm">
+          <div className="border-b border-slate-200 bg-slate-900 px-5 py-4 text-white">
+            <p className="text-sm font-semibold uppercase tracking-wide text-sky-200">
+              Search student listings
+            </p>
+            <h1 className="mt-2 text-3xl font-bold md:text-4xl">Find campus items near you</h1>
+          </div>
+          <form className="grid gap-4 p-5 md:grid-cols-[1fr_190px_190px_auto]" action="/browse">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700" htmlFor="home-search">
+                Keyword
+              </label>
+              <input
+                className="h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-sky-600"
+                id="home-search"
+                name="search"
+                placeholder="Book, desk, headphones"
+                type="search"
+              />
             </div>
-            <div className="space-y-4">
-              <h1 className="text-5xl font-bold leading-tight text-gray-950 md:text-6xl">
-                Student Marketplace
-              </h1>
-              <p className="max-w-xl text-lg leading-8 text-gray-700">
-                Buy and sell useful campus items with verified students. Start with a student
-                gmail.com account or approved student mail.
-              </p>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700" htmlFor="home-category">
+                Category
+              </label>
+              <select
+                className="h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-sky-600"
+                id="home-category"
+                name="category"
+              >
+                <option value="">All categories</option>
+                <option value="books">Books</option>
+                <option value="furniture">Furniture</option>
+                <option value="electronics">Electronics</option>
+                <option value="kitchen">Kitchen</option>
+              </select>
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row">
-            <Link href="/auth/signup">
-              <Button size="lg" className="shadow-lg shadow-blue-600/20">
-                Create Account
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700" htmlFor="home-price">
+                Price
+              </label>
+              <select
+                className="h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none focus:border-sky-600"
+                id="home-price"
+                name="price"
+              >
+                <option>Any price</option>
+                <option>Under SEK 200</option>
+                <option>Under SEK 500</option>
+                <option>Under SEK 1000</option>
+              </select>
+            </div>
+            <div className="flex items-end">
+              <Button className="h-11 w-full" type="submit">
+                Search
               </Button>
-            </Link>
-            <Link href="/browse">
-              <Button size="lg" variant="outline" className="bg-white/90 backdrop-blur">
-                Browse Listings
-              </Button>
-            </Link>
             </div>
+          </form>
+          <div className="grid border-t border-slate-200 bg-slate-50 md:grid-cols-3">
+            {[
+              ['48h', 'fast campus handoff'],
+              ['SEK', 'student-friendly pricing'],
+              ['ID', 'student email access'],
+            ].map(([value, label]) => (
+              <div className="border-slate-200 p-5 md:border-r last:md:border-r-0" key={value}>
+                <p className="text-2xl font-bold text-slate-950">{value}</p>
+                <p className="mt-1 text-sm text-slate-600">{label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
-            <div className="grid max-w-xl grid-cols-3 gap-3 pt-2">
-              {[
-                ['48h', 'fast campus handoff'],
-                ['SEK', 'student-friendly pricing'],
-                ['ID', 'student email access'],
-              ].map(([value, label]) => (
-                <div
-                  className="rounded-lg border border-white/70 bg-white/75 p-4 shadow-sm backdrop-blur"
-                  key={value}
-                >
-                  <p className="text-xl font-bold text-gray-950">{value}</p>
-                  <p className="mt-1 text-xs text-gray-600">{label}</p>
-                </div>
-              ))}
-            </div>
+        <div className="relative min-h-72 overflow-hidden rounded-md border border-slate-300 bg-[url('/images/student-marketplace-hero.png')] bg-cover bg-center shadow-sm">
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
+          <div className="absolute bottom-0 p-5 text-white">
+            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-200">
+              Campus reuse
+            </p>
+            <h2 className="mt-2 text-2xl font-bold">Books, furniture, tech and kitchen gear</h2>
           </div>
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-4">
+      <section className="grid gap-3 md:grid-cols-4">
         {[
           ['Books', 'books'],
           ['Dorm furniture', 'furniture'],
@@ -116,13 +155,13 @@ export default function HomePage() {
           ['Kitchen gear', 'kitchen'],
         ].map(([label, category]) => (
           <Link
-            className="group overflow-hidden rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+            className="group overflow-hidden rounded-md border border-slate-200 bg-white p-5 shadow-sm transition hover:border-sky-300 hover:shadow-md"
             href={`/browse?category=${category}`}
             key={label}
           >
-            <div className="mb-6 h-1.5 w-16 rounded-full bg-emerald-500 transition group-hover:w-24" />
-            <h2 className="text-lg font-semibold text-gray-950">{label}</h2>
-            <p className="mt-2 text-sm text-gray-600">Find local student listings</p>
+            <div className="mb-5 h-1 w-14 rounded-full bg-sky-600 transition group-hover:w-24" />
+            <h2 className="text-lg font-semibold text-slate-950">{label}</h2>
+            <p className="mt-2 text-sm text-slate-600">Find local student listings</p>
           </Link>
         ))}
       </section>

@@ -48,13 +48,22 @@ export function Navigation() {
   }
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-        <Link href="/" className="text-xl font-bold text-blue-600">
-          Student Marketplace
+    <nav className="sticky top-0 z-50 border-b border-slate-300 bg-white/95 shadow-sm backdrop-blur">
+      <div className="border-b border-slate-100 bg-slate-50">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 text-xs text-slate-600">
+          <span>Verified student marketplace</span>
+          <span>Campus handoff · Used books · Dorm essentials</span>
+        </div>
+      </div>
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+        <Link href="/" className="flex items-center gap-2 text-xl font-bold text-slate-950">
+          <span className="flex h-9 w-9 items-center justify-center rounded-md bg-sky-600 text-sm font-black text-white">
+            SM
+          </span>
+          <span>Student Marketplace</span>
         </Link>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <Link href="/browse">
             <Button variant="ghost">Browse</Button>
           </Link>
