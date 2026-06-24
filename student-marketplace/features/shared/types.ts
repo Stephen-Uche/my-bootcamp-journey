@@ -7,6 +7,7 @@ export const createListingSchema = z.object({
   price: z.number().positive('Price must be positive'),
   condition: z.enum(['new', 'like-new', 'good', 'fair']),
   imageUrl: z.string().url('Image must be a valid URL').optional().or(z.literal('')),
+  imageUrls: z.array(z.string().url('Image must be a valid URL')).max(8).optional(),
 })
 
 export type CreateListingInput = z.infer<typeof createListingSchema>

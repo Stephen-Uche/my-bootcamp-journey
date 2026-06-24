@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getListingById } from '@/features/listings/api'
 import ContactSellerCard from './ContactSellerCard'
+import ListingPhotoGallery from './ListingPhotoGallery'
 
 type ListingDetailPageProps = {
   params: {
@@ -46,40 +47,7 @@ export default async function ListingDetailPage({ params }: ListingDetailPagePro
       </div>
 
       <section className="grid gap-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
-        <div className="space-y-4">
-          {photos[0] ? (
-            <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-100">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                alt={listing.title}
-                className="h-full w-full object-contain"
-                src={photos[0]}
-              />
-            </div>
-          ) : (
-            <div className="flex aspect-[4/3] items-center justify-center rounded-lg border border-dashed border-gray-300 bg-white text-sm text-gray-500">
-              No photo added
-            </div>
-          )}
-
-          {photos.length > 1 ? (
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-              {photos.slice(1, 5).map((photo, index) => (
-                <div
-                  className="flex aspect-square items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-100"
-                  key={photo}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    alt={`${listing.title} photo ${index + 2}`}
-                    className="h-full w-full object-contain"
-                    src={photo}
-                  />
-                </div>
-              ))}
-            </div>
-          ) : null}
-        </div>
+        <ListingPhotoGallery photos={photos} title={listing.title} />
 
         <aside className="space-y-4">
           <Card>

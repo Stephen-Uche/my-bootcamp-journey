@@ -17,6 +17,7 @@ type FormState = {
 }
 
 const categories = ['books', 'furniture', 'electronics', 'clothing', 'kitchen', 'other']
+const maxPhotos = 8
 
 const initialFormState: FormState = {
   title: '',
@@ -31,8 +32,8 @@ export default function PostPage() {
   const [sellerId, setSellerId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreviewUrl, setImagePreviewUrl] = useState('')
+  const [imageFiles, setImageFiles] = useState<File[]>([])
+  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([])
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -46,16 +47,26 @@ export default function PostPage() {
   }, [])
 
   useEffect(() => {
-    if (!imageFile) {
-      setImagePreviewUrl('')
+    if (imageFiles.length === 0) {
+      setImagePreviewUrls([])
       return
     }
 
-    const objectUrl = URL.createObjectURL(imageFile)
-    setImagePreviewUrl(objectUrl)
+    const objectUrls = imageFiles.map((file) => URL.createObjectURL(file))
+    setImagePreviewUrls(objectUrls)
 
-    return () => URL.revokeObjectURL(objectUrl)
-  }, [imageFile])
+    return () => objectUrls.forEach((objectUrl) => URL.revokeObjectURL(objectUrl))
+  }, [imageFiles])
+
+  const addImageFiles = (files: FileList | null) => {
+    if (!files) return
+    const selectedFiles = Array.from(files).filter((file) => file.type.startsWith('image/'))
+    setImageFiles((currentFiles) => [...currentFiles, ...selectedFiles].slice(0, maxPhotos))
+  }
+
+  const removeImageFile = (index: number) => {
+    setImageFiles((currentFiles) => currentFiles.filter((_, fileIndex) => fileIndex !== index))
+  }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -78,20 +89,20 @@ export default function PostPage() {
 
     setIsSubmitting(true)
 
-    let imageUrl = ''
-    if (imageFile) {
+    const imageUrls: string[] = []
+    for (const imageFile of imageFiles) {
       const uploadResult = await uploadListingPhoto(imageFile)
-      if (!uploadResult.success) {
+      if (!uploadResult.success || !uploadResult.url) {
         setIsSubmitting(false)
         setMessage(uploadResult.error || 'Failed to upload image.')
         return
       }
-      imageUrl = uploadResult.url || ''
+      imageUrls.push(uploadResult.url)
     }
 
     const result = await createListing({
       ...parsed.data,
-      imageUrl,
+      imageUrls,
     })
     setIsSubmitting(false)
 
@@ -101,7 +112,7 @@ export default function PostPage() {
     }
 
     setForm(initialFormState)
-    setImageFile(null)
+    setImageFiles([])
     setMessage('Listing created. It is now available in browse.')
   }
 
@@ -170,7 +181,7 @@ export default function PostPage() {
 
             <div className="space-y-3">
               <label className="text-sm font-medium" htmlFor="imageFile">
-                Upload image
+                Upload product photos
               </label>
               <div className="grid gap-3 sm:grid-cols-2">
                 <label
@@ -178,7 +189,7 @@ export default function PostPage() {
                   htmlFor="imageFile"
                 >
                   <span className="font-medium text-gray-900">Choose from files</span>
-                  <span className="mt-1 text-xs">JPG, PNG, WebP, or HEIC</span>
+                  <span className="mt-1 text-xs">Add up to {maxPhotos} sides or details</span>
                 </label>
                 <label
                   className="flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-5 text-center text-sm text-gray-600 transition hover:border-blue-500 hover:bg-blue-50"
@@ -192,7 +203,8 @@ export default function PostPage() {
                 accept="image/*"
                 className="sr-only"
                 id="imageFile"
-                onChange={(event) => setImageFile(event.target.files?.[0] || null)}
+                multiple
+                onChange={(event) => addImageFiles(event.target.files)}
                 type="file"
               />
               <input
@@ -200,29 +212,45 @@ export default function PostPage() {
                 capture="environment"
                 className="sr-only"
                 id="cameraImage"
-                onChange={(event) => setImageFile(event.target.files?.[0] || null)}
+                onChange={(event) => addImageFiles(event.target.files)}
                 type="file"
               />
-              {imageFile ? (
+              {imageFiles.length > 0 ? (
                 <div className="flex items-center justify-between rounded-md border border-gray-200 bg-white px-3 py-2 text-sm">
-                  <span className="truncate text-gray-700">{imageFile.name}</span>
+                  <span className="truncate text-gray-700">
+                    {imageFiles.length} photo{imageFiles.length === 1 ? '' : 's'} selected
+                  </span>
                   <button
                     className="font-medium text-blue-600 hover:text-blue-700"
-                    onClick={() => setImageFile(null)}
+                    onClick={() => setImageFiles([])}
                     type="button"
                   >
-                    Remove
+                    Remove all
                   </button>
                 </div>
               ) : null}
-              {imagePreviewUrl ? (
-                <div className="flex h-48 items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-50 sm:h-56 md:h-64">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    alt="Listing preview"
-                    className="h-full w-full object-contain"
-                    src={imagePreviewUrl}
-                  />
+              {imagePreviewUrls.length > 0 ? (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {imagePreviewUrls.map((imagePreviewUrl, index) => (
+                    <div
+                      className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-50"
+                      key={imagePreviewUrl}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        alt={`Listing preview ${index + 1}`}
+                        className="h-full w-full object-contain"
+                        src={imagePreviewUrl}
+                      />
+                      <button
+                        className="absolute right-2 top-2 rounded-md bg-white/95 px-2 py-1 text-xs font-semibold text-gray-800 shadow-sm hover:bg-white"
+                        onClick={() => removeImageFile(index)}
+                        type="button"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
                 </div>
               ) : null}
             </div>

@@ -184,6 +184,8 @@ export async function createListing(input: CreateListingInput) {
       return { success: false, error: 'Sign in before creating a listing.' }
     }
 
+    const photos = input.imageUrls?.length ? input.imageUrls : input.imageUrl ? [input.imageUrl] : []
+
     const { data, error } = await supabase
       .from('listings')
       .insert([
@@ -195,7 +197,7 @@ export async function createListing(input: CreateListingInput) {
           price: input.price,
           condition: input.condition,
           status: 'available',
-          photos: input.imageUrl ? [input.imageUrl] : [],
+          photos,
         },
       ])
       .select()
@@ -241,7 +243,9 @@ export async function updateListing(
       status: input.status,
     }
 
-    if (input.imageUrl) {
+    if (input.imageUrls) {
+      updatePayload.photos = input.imageUrls
+    } else if (input.imageUrl) {
       updatePayload.photos = [input.imageUrl]
     }
 
