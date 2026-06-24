@@ -148,16 +148,16 @@ export default function MyListingsPage() {
           {filteredListings.map((listing) => (
             <Card key={listing.id}>
               <div className="grid gap-4 p-4 sm:grid-cols-[150px_1fr]">
-                <div className="overflow-hidden rounded-lg bg-gray-100">
+                <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-lg bg-gray-100">
                   {listing.photos?.[0] ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                       alt={listing.title}
-                      className="aspect-[4/3] h-full w-full object-cover"
+                      className="max-h-full max-w-full object-contain"
                       src={listing.photos[0]}
                     />
                   ) : (
-                    <div className="flex aspect-[4/3] items-center justify-center text-sm text-gray-500">
+                    <div className="text-sm text-gray-500">
                       No photo
                     </div>
                   )}
