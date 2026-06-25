@@ -177,7 +177,8 @@ export default function EditListingPage({ params }: EditListingPageProps) {
       return
     }
 
-    window.location.href = parsed.data.status === 'available' ? `/listing/${params.id}` : '/my-listings'
+    window.location.href =
+      parsed.data.status === 'available' ? `/listing/${params.id}?updated=${Date.now()}` : '/my-listings'
   }
 
   if (isLoading) {

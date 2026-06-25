@@ -3,6 +3,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getListings } from '@/features/listings/api'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 type BrowsePageProps = {
   searchParams?: {
     category?: string

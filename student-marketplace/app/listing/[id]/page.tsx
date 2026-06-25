@@ -6,6 +6,9 @@ import { getListingById } from '@/features/listings/api'
 import ContactSellerCard from './ContactSellerCard'
 import ListingPhotoGallery from './ListingPhotoGallery'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 type ListingDetailPageProps = {
   params: {
     id: string
