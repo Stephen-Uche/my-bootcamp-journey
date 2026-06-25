@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button, getButtonClassName } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/features/auth/api'
 import { getMyListings } from '@/features/listings/api'
@@ -199,8 +199,11 @@ export default function MyListingsPage() {
                         <Button variant="outline">View</Button>
                       </Link>
                     ) : null}
-                    <Link href={`/listing/${listing.id}/edit`}>
-                      <Button>Edit</Button>
+                    <Link
+                      className={getButtonClassName()}
+                      href={`/listing/${listing.id}/edit`}
+                    >
+                      Edit
                     </Link>
                   </div>
                 </div>

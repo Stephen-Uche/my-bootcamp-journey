@@ -24,6 +24,23 @@ const sizeClasses: Record<ButtonSize, string> = {
   lg: 'h-12 px-6 py-3 text-base',
 }
 
+export function getButtonClassName({
+  className = '',
+  variant = 'default',
+  size = 'default',
+}: {
+  className?: string
+  variant?: ButtonVariant
+  size?: ButtonSize
+} = {}) {
+  return [
+    'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+    variantClasses[variant],
+    sizeClasses[size],
+    className,
+  ].join(' ')
+}
+
 export function Button({
   children,
   className = '',
@@ -34,12 +51,7 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
-      className={[
-        'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-        variantClasses[variant],
-        sizeClasses[size],
-        className,
-      ].join(' ')}
+      className={getButtonClassName({ className, variant, size })}
       type={type}
       {...props}
     >

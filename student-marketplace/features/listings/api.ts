@@ -295,6 +295,33 @@ export async function updateListingStatus(id: string, status: 'available' | 'sol
   }
 }
 
+export async function deleteListing(id: string) {
+  if (!isSupabaseConfigured) {
+    return { success: false, error: 'Supabase is not configured.' }
+  }
+
+  try {
+    const { data: userData, error: userError } = await supabase.auth.getUser()
+    if (userError || !userData.user) {
+      return { success: false, error: 'Sign in before deleting this listing.' }
+    }
+
+    const { error } = await supabase
+      .from('listings')
+      .delete()
+      .eq('id', id)
+      .eq('seller_id', userData.user.id)
+
+    if (error) throw error
+    return { success: true }
+  } catch (error) {
+    return {
+      success: false,
+      error: getErrorMessage(error, 'Failed to delete listing'),
+    }
+  }
+}
+
 export async function updateListingModerationStatus(
   id: string,
   status: 'available' | 'sold' | 'removed'

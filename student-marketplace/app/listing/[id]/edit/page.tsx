@@ -5,7 +5,7 @@ import { FormEvent, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/features/auth/api'
-import { getListingById, updateListing, uploadListingPhoto } from '@/features/listings/api'
+import { deleteListing, getListingById, updateListing, uploadListingPhoto } from '@/features/listings/api'
 import { updateListingSchema } from '@/features/shared/types'
 
 type EditListingPageProps = {
@@ -134,6 +134,26 @@ export default function EditListingPage({ params }: EditListingPageProps) {
 
     setIsSubmitting(true)
 
+    if (parsed.data.status === 'removed') {
+      const confirmed = window.confirm('Delete this listing permanently?')
+
+      if (!confirmed) {
+        setIsSubmitting(false)
+        return
+      }
+
+      const deleteResult = await deleteListing(params.id)
+      setIsSubmitting(false)
+
+      if (!deleteResult.success) {
+        setMessage(deleteResult.error || 'Failed to delete listing.')
+        return
+      }
+
+      window.location.href = '/my-listings'
+      return
+    }
+
     const uploadedImageUrls: string[] = []
     for (const imageFile of imageFiles) {
       const uploadResult = await uploadListingPhoto(imageFile)
@@ -157,7 +177,7 @@ export default function EditListingPage({ params }: EditListingPageProps) {
       return
     }
 
-    window.location.href = parsed.data.status === 'available' ? `/listing/${params.id}` : '/profile'
+    window.location.href = parsed.data.status === 'available' ? `/listing/${params.id}` : '/my-listings'
   }
 
   if (isLoading) {
@@ -384,7 +404,7 @@ export default function EditListingPage({ params }: EditListingPageProps) {
                 >
                   <option value="available">Available</option>
                   <option value="sold">Sold</option>
-                  <option value="removed">Removed</option>
+                  <option value="removed">Delete listing</option>
                 </select>
               </div>
             </div>

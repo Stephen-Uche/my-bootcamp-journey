@@ -2,10 +2,10 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button, getButtonClassName } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser } from '@/features/auth/api'
-import { updateListingStatus } from '@/features/listings/api'
+import { deleteListing, updateListingStatus } from '@/features/listings/api'
 import { supabase } from '@/lib/supabase-client'
 
 type ContactSellerCardProps = {
@@ -115,7 +115,7 @@ export default function ContactSellerCard({
 
     setStatusMessage('')
     setIsDeleting(true)
-    const result = await updateListingStatus(listingId, 'removed')
+    const result = await deleteListing(listingId)
     setIsDeleting(false)
 
     if (!result.success) {
@@ -169,10 +169,11 @@ export default function ContactSellerCard({
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-gray-600">This item is listed from your account.</p>
-          <Link href={`/listing/${listingId}/edit`}>
-            <Button className="w-full">
-              Edit Listing
-            </Button>
+          <Link
+            className={getButtonClassName({ className: 'w-full' })}
+            href={`/listing/${listingId}/edit`}
+          >
+            Edit Listing
           </Link>
           <Button
             className="w-full"
