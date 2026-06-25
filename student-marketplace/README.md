@@ -72,7 +72,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 The Supabase client is configured in:
 
 ```text
-lib/supabase-client.ts
+src/backend/lib/supabase-client.ts
 ```
 
 The app requires `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to start.
@@ -98,13 +98,13 @@ created by the migration, so it does not need separate manual setup in the Stora
 The schema, row-level security policies, and `listing-images` storage bucket are versioned in:
 
 ```text
-supabase/migrations/20260623000000_initial_marketplace_schema.sql
+infra/supabase/migrations/20260623000000_initial_marketplace_schema.sql
 ```
 
 Apply it with the Supabase CLI from the project root:
 
 ```bash
-supabase db push
+supabase db push --workdir infra/supabase
 ```
 
 Or open Supabase Dashboard -> SQL Editor and run the migration file contents.
@@ -143,7 +143,7 @@ from promoting themselves by updating their own profile role.
 Review the shared domain file:
 
 ```text
-features/shared/types.ts
+src/backend/features/shared/types.ts
 ```
 
 This file contains:
@@ -175,7 +175,7 @@ The shared layer gives the project:
 Review the listings API module:
 
 ```text
-features/listings/api.ts
+src/backend/features/listings/api.ts
 ```
 
 It exposes these async functions:
@@ -218,7 +218,7 @@ This keeps UI code from needing to know Supabase error details directly.
 Review the auth API module:
 
 ```text
-features/auth/api.ts
+src/backend/features/auth/api.ts
 ```
 
 It exposes these async functions:
@@ -258,13 +258,13 @@ university
 Review the home page:
 
 ```text
-app/page.tsx
+src/app/page.tsx
 ```
 
 The home page imports listing data through:
 
 ```ts
-import { getListings } from '@/features/listings/api'
+import { getListings } from '@/backend/features/listings/api'
 ```
 
 ### Information
@@ -338,23 +338,31 @@ These commands verify:
 ## Project Structure
 
 ```text
-app/
-  layout.tsx
-  page.tsx
-  globals.css
-components/
-  Navigation.tsx
-  ui/
-features/
-  auth/
-    api.ts
-  listings/
-    api.ts
-  shared/
-    types.ts
-lib/
-  supabase-client.ts
-Implement_Service_Layer.md
+src/
+  app/
+    layout.tsx
+    page.tsx
+    globals.css
+    api/
+  frontend/
+    components/
+      Navigation.tsx
+      ui/
+  backend/
+    features/
+      auth/
+        api.ts
+      feedback/
+        api.ts
+      listings/
+        api.ts
+      shared/
+        types.ts
+    lib/
+      supabase-client.ts
+infra/
+  supabase/
+    migrations/
 package.json
 README.md
 ```
