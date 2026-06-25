@@ -209,11 +209,15 @@ export default function ContactSellerCard({
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-sm text-gray-600">{contactStatus}</p>
-        <a aria-disabled={!canContact} href={canContact ? contactHref : undefined}>
-          <Button className="w-full" disabled={!canContact} size="lg">
+        {canContact ? (
+          <a className={getButtonClassName({ className: 'w-full', size: 'lg' })} href={contactHref}>
+            Email Seller
+          </a>
+        ) : (
+          <Button className="w-full" disabled size="lg">
             Email Seller
           </Button>
-        </a>
+        )}
       </CardContent>
     </Card>
   )
