@@ -36,6 +36,7 @@ export default function LikeButton({ listingId, className = '' }: LikeButtonProp
   const [likesCount, setLikesCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
     let isMounted = true
@@ -50,13 +51,17 @@ export default function LikeButton({ listingId, className = '' }: LikeButtonProp
           },
         })
 
-        if (!response.ok) return
+        if (!response.ok) {
+          setErrorMessage('Likes are not available yet.')
+          return
+        }
 
         const data = (await response.json()) as LikeState
         if (!isMounted) return
 
         setLiked(data.liked)
         setLikesCount(data.likesCount)
+        setErrorMessage('')
       } finally {
         if (isMounted) {
           setIsLoading(false)
@@ -75,12 +80,9 @@ export default function LikeButton({ listingId, className = '' }: LikeButtonProp
     if (isSaving) return
 
     const nextLiked = !liked
-    const previousLiked = liked
-    const previousLikesCount = likesCount
 
-    setLiked(nextLiked)
-    setLikesCount((count) => Math.max(0, count + (nextLiked ? 1 : -1)))
     setIsSaving(true)
+    setErrorMessage('')
 
     try {
       const visitorId = getBrowserVisitorId()
@@ -98,8 +100,7 @@ export default function LikeButton({ listingId, className = '' }: LikeButtonProp
       setLikesCount(data.likesCount)
     } catch (error) {
       console.error('Failed to update like:', error)
-      setLiked(previousLiked)
-      setLikesCount(previousLikesCount)
+      setErrorMessage('Could not save like.')
     } finally {
       setIsSaving(false)
       setIsLoading(false)
@@ -107,25 +108,29 @@ export default function LikeButton({ listingId, className = '' }: LikeButtonProp
   }
 
   return (
-    <button
-      aria-label={liked ? 'Unlike listing' : 'Like listing'}
-      aria-pressed={liked}
-      className={[
-        'inline-flex h-10 min-w-[96px] items-center justify-center gap-2 rounded-md border px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
-        liked
-          ? 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100'
-          : 'border-slate-300 bg-white text-slate-700 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700',
-        className,
-      ].join(' ')}
-      disabled={isSaving}
-      onClick={toggleLike}
-      type="button"
-    >
-      <span aria-hidden="true" className="text-base leading-none">
-        {liked ? '\u2665' : '\u2661'}
-      </span>
-      <span>{liked ? 'Liked' : 'Like'}</span>
-      <span>{isLoading ? '-' : likesCount}</span>
-    </button>
+    <div className={className}>
+      <button
+        aria-label={liked ? 'Unlike listing' : 'Like listing'}
+        aria-pressed={liked}
+        className={[
+          'inline-flex h-10 w-full min-w-[96px] items-center justify-center gap-2 rounded-md border px-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
+          liked
+            ? 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100'
+            : 'border-slate-300 bg-white text-slate-700 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700',
+        ].join(' ')}
+        disabled={isSaving || isLoading}
+        onClick={toggleLike}
+        type="button"
+      >
+        <span aria-hidden="true" className="text-base leading-none">
+          {liked ? '\u2665' : '\u2661'}
+        </span>
+        <span>{isSaving ? 'Saving' : liked ? 'Liked' : 'Like'}</span>
+        <span>{isLoading ? '-' : likesCount}</span>
+      </button>
+      {errorMessage ? (
+        <p className="mt-1 text-center text-xs font-medium text-rose-700">{errorMessage}</p>
+      ) : null}
+    </div>
   )
 }
