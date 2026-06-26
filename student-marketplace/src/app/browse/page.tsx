@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Button } from '@/frontend/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/frontend/components/ui/card'
 import { getListings } from '@/backend/features/listings/api'
+import LikeButton from '@/frontend/components/LikeButton'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -108,33 +109,41 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
       ) : (
         <div className="space-y-3">
           {listings.map((listing) => (
-            <Link key={listing.id} href={`/listing/${listing.id}`}>
-              <Card className="cursor-pointer transition hover:border-sky-300 hover:shadow-md">
-                <div className="grid gap-4 p-4 sm:grid-cols-[150px_1fr] lg:grid-cols-[170px_1fr_auto] lg:items-center">
-                  <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-md bg-slate-100">
-                    {listing.photos?.[0] ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        alt={listing.title}
-                        className="h-full w-full object-contain"
-                        src={listing.photos[0]}
-                      />
-                    ) : (
-                      <div className="text-sm text-slate-500">
-                        No photo
-                      </div>
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <CardTitle className="line-clamp-1 text-lg">{listing.title}</CardTitle>
-                    <p className="mt-1 text-sm capitalize text-slate-500">
-                      {listing.category} · {listing.condition}
-                    </p>
-                    <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">
-                      {listing.description}
-                    </p>
-                  </div>
-                  <div className="text-left sm:col-span-2 lg:col-span-1 lg:text-right">
+            <Card key={listing.id} className="transition hover:border-sky-300 hover:shadow-md">
+              <div className="grid gap-4 p-4 sm:grid-cols-[150px_1fr] lg:grid-cols-[170px_1fr_auto] lg:items-center">
+                <Link
+                  aria-label={`View ${listing.title}`}
+                  className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-md bg-slate-100"
+                  href={`/listing/${listing.id}`}
+                >
+                  {listing.photos?.[0] ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      alt={listing.title}
+                      className="h-full w-full object-contain"
+                      src={listing.photos[0]}
+                    />
+                  ) : (
+                    <div className="text-sm text-slate-500">
+                      No photo
+                    </div>
+                  )}
+                </Link>
+                <div className="min-w-0">
+                  <CardTitle className="line-clamp-1 text-lg">
+                    <Link className="hover:text-sky-700" href={`/listing/${listing.id}`}>
+                      {listing.title}
+                    </Link>
+                  </CardTitle>
+                  <p className="mt-1 text-sm capitalize text-slate-500">
+                    {listing.category} · {listing.condition}
+                  </p>
+                  <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">
+                    {listing.description}
+                  </p>
+                </div>
+                <div className="flex items-end justify-between gap-3 sm:col-span-2 lg:col-span-1 lg:flex-col lg:items-end lg:text-right">
+                  <div>
                     <p className="text-2xl font-bold text-sky-700">
                       SEK {listing.price.toFixed(0)}
                     </p>
@@ -142,9 +151,10 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                       Available
                     </p>
                   </div>
+                  <LikeButton listingId={listing.id} />
                 </div>
-              </Card>
-            </Link>
+              </div>
+            </Card>
           ))}
         </div>
       )}

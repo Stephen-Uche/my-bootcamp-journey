@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { Button } from '@/frontend/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/frontend/components/ui/card'
 import { getListingById } from '@/backend/features/listings/api'
+import LikeButton from '@/frontend/components/LikeButton'
 import ContactSellerCard from './ContactSellerCard'
 import ListingPhotoGallery from './ListingPhotoGallery'
 
@@ -67,7 +68,10 @@ export default async function ListingDetailPage({ params }: ListingDetailPagePro
               <p className="text-sm text-gray-500">Listed {formatDate(listing.created_at)}</p>
             </CardHeader>
             <CardContent className="space-y-6">
-              <p className="text-4xl font-bold text-blue-600">SEK {listing.price.toFixed(0)}</p>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-4xl font-bold text-blue-600">SEK {listing.price.toFixed(0)}</p>
+                <LikeButton listingId={listing.id} />
+              </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-lg bg-gray-50 p-3">
                   <p className="text-gray-500">Status</p>
