@@ -53,7 +53,7 @@ export default function SignupPage() {
         <CardHeader>
           <CardTitle className="text-2xl">Create student account</CardTitle>
           <p className="text-sm text-gray-600">
-            Sign up with gmail.com or an approved student email address.
+            Sign up with gmail.com or an approved Swedish school email address.
           </p>
         </CardHeader>
         <CardContent>
@@ -84,7 +84,9 @@ export default function SignupPage() {
                 type="email"
                 value={form.email}
               />
-              <p className="text-xs text-gray-500">Use gmail.com, gmail.se, or student mail.</p>
+              <p className="text-xs text-gray-500">
+                Use Gmail, university email, or YH student mail.
+              </p>
             </div>
 
             <div className="space-y-2">
