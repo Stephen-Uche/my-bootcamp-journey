@@ -114,6 +114,14 @@ profile row when a Supabase Auth user is created, listing status values, the
 public `listing-images` bucket, and RLS policies for public browsing,
 seller-owned listing management, profile ownership, and image uploads.
 
+Anonymous product likes are versioned in:
+
+```text
+infra/supabase/migrations/20260626000000_anonymous_listing_likes.sql
+```
+
+Run this migration too. Without it, the app cannot persist or count product likes and the API will report that `public.listing_likes` is missing.
+
 ### Configure admin moderation
 
 Moderation is available at:

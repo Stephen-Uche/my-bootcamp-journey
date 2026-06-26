@@ -116,6 +116,25 @@ function getLikeClient(visitorId: string) {
   })
 }
 
+function isMissingLikesTableError(error: unknown) {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code?: unknown }).code === 'PGRST205'
+  )
+}
+
+function likesTableMissingResponse() {
+  return NextResponse.json(
+    {
+      error:
+        'Listing likes are not set up yet. Apply infra/supabase/migrations/20260626000000_anonymous_listing_likes.sql in Supabase.',
+    },
+    { status: 503 }
+  )
+}
+
 export async function GET(request: Request, { params }: LikeRouteContext) {
   if (!isSupabaseConfigured) {
     return NextResponse.json({ error: 'Supabase is not configured.' }, { status: 503 })
@@ -138,6 +157,10 @@ export async function GET(request: Request, { params }: LikeRouteContext) {
     const state = await getLikeState(listingId, visitorId, likeClient)
     return jsonWithVisitorCookie(state, visitorId)
   } catch (error) {
+    if (isMissingLikesTableError(error)) {
+      return likesTableMissingResponse()
+    }
+
     console.error('Failed to load listing like state:', error)
     return NextResponse.json({ error: 'Failed to load likes.' }, { status: 500 })
   }
@@ -177,6 +200,10 @@ export async function POST(request: Request, { params }: LikeRouteContext) {
     const state = await getLikeState(listingId, visitorId, likeClient)
     return jsonWithVisitorCookie(state, visitorId)
   } catch (error) {
+    if (isMissingLikesTableError(error)) {
+      return likesTableMissingResponse()
+    }
+
     console.error('Failed to like listing:', error)
     return NextResponse.json({ error: 'Failed to like listing.' }, { status: 500 })
   }
@@ -206,6 +233,10 @@ export async function DELETE(request: Request, { params }: LikeRouteContext) {
     const state = await getLikeState(listingId, visitorId, likeClient)
     return jsonWithVisitorCookie(state, visitorId)
   } catch (error) {
+    if (isMissingLikesTableError(error)) {
+      return likesTableMissingResponse()
+    }
+
     console.error('Failed to unlike listing:', error)
     return NextResponse.json({ error: 'Failed to unlike listing.' }, { status: 500 })
   }

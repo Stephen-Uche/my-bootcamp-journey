@@ -1,6 +1,6 @@
 -- Anonymous listing likes are tracked per browser visitor cookie.
--- The table has RLS enabled and is intended to be written through Next.js API
--- routes that use SUPABASE_SERVICE_ROLE_KEY, not directly from the browser.
+-- The table has RLS enabled so visitors can only write rows for their own
+-- visitor id and only for available listings.
 
 create table if not exists public.listing_likes (
   id uuid primary key default gen_random_uuid(),
