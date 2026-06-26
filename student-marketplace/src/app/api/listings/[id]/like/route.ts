@@ -1,6 +1,12 @@
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { isSupabaseConfigured, supabaseServer } from '@/backend/lib/supabase-client'
+import { createClient } from '@supabase/supabase-js'
+import {
+  isSupabaseConfigured,
+  supabaseAnonKey,
+  supabaseServer,
+  supabaseUrl,
+} from '@/backend/lib/supabase-client'
 
 const visitorCookieName = 'student_marketplace_visitor_id'
 const visitorCookieMaxAge = 60 * 60 * 24 * 365
@@ -54,13 +60,19 @@ async function ensureAvailableListing(listingId: string) {
   return Boolean(data)
 }
 
-async function getLikeState(listingId: string, visitorId: string) {
+type LikeClient = typeof supabaseServer
+
+async function getLikeState(
+  listingId: string,
+  visitorId: string,
+  likeClient: LikeClient = supabaseServer
+) {
   const [countResult, likedResult] = await Promise.all([
-    supabaseServer
+    likeClient
       .from('listing_likes')
       .select('id', { count: 'exact', head: true })
       .eq('listing_id', listingId),
-    supabaseServer
+    likeClient
       .from('listing_likes')
       .select('id')
       .eq('listing_id', listingId)
@@ -77,10 +89,6 @@ async function getLikeState(listingId: string, visitorId: string) {
   }
 }
 
-function serviceRoleMissing() {
-  return !process.env.SUPABASE_SERVICE_ROLE_KEY
-}
-
 function getListingId(params: LikeRouteContext['params']): string | null {
   const id = params.id
   if (typeof id !== 'string' || id.length === 0) {
@@ -90,13 +98,27 @@ function getListingId(params: LikeRouteContext['params']): string | null {
   return id
 }
 
+function getLikeClient(visitorId: string) {
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return supabaseServer
+  }
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase environment variables')
+  }
+
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        [visitorHeaderName]: visitorId,
+      },
+    },
+  })
+}
+
 export async function GET(request: Request, { params }: LikeRouteContext) {
   if (!isSupabaseConfigured) {
     return NextResponse.json({ error: 'Supabase is not configured.' }, { status: 503 })
-  }
-
-  if (serviceRoleMissing()) {
-    return NextResponse.json({ error: 'Server likes API is not configured.' }, { status: 503 })
   }
 
   try {
@@ -106,13 +128,14 @@ export async function GET(request: Request, { params }: LikeRouteContext) {
     }
 
     const visitorId = getVisitorId(request)
+    const likeClient = getLikeClient(visitorId)
     const listingExists = await ensureAvailableListing(listingId)
 
     if (!listingExists) {
       return jsonWithVisitorCookie({ error: 'Listing was not found.' }, visitorId, 404)
     }
 
-    const state = await getLikeState(listingId, visitorId)
+    const state = await getLikeState(listingId, visitorId, likeClient)
     return jsonWithVisitorCookie(state, visitorId)
   } catch (error) {
     console.error('Failed to load listing like state:', error)
@@ -125,10 +148,6 @@ export async function POST(request: Request, { params }: LikeRouteContext) {
     return NextResponse.json({ error: 'Supabase is not configured.' }, { status: 503 })
   }
 
-  if (serviceRoleMissing()) {
-    return NextResponse.json({ error: 'Server likes API is not configured.' }, { status: 503 })
-  }
-
   try {
     const listingId = getListingId(params)
     if (!listingId) {
@@ -136,13 +155,14 @@ export async function POST(request: Request, { params }: LikeRouteContext) {
     }
 
     const visitorId = getVisitorId(request)
+    const likeClient = getLikeClient(visitorId)
     const listingExists = await ensureAvailableListing(listingId)
 
     if (!listingExists) {
       return jsonWithVisitorCookie({ error: 'Listing was not found.' }, visitorId, 404)
     }
 
-    const { error } = await supabaseServer
+    const { error } = await likeClient
       .from('listing_likes')
       .upsert(
         {
@@ -154,7 +174,7 @@ export async function POST(request: Request, { params }: LikeRouteContext) {
 
     if (error) throw error
 
-    const state = await getLikeState(listingId, visitorId)
+    const state = await getLikeState(listingId, visitorId, likeClient)
     return jsonWithVisitorCookie(state, visitorId)
   } catch (error) {
     console.error('Failed to like listing:', error)
@@ -167,10 +187,6 @@ export async function DELETE(request: Request, { params }: LikeRouteContext) {
     return NextResponse.json({ error: 'Supabase is not configured.' }, { status: 503 })
   }
 
-  if (serviceRoleMissing()) {
-    return NextResponse.json({ error: 'Server likes API is not configured.' }, { status: 503 })
-  }
-
   try {
     const listingId = getListingId(params)
     if (!listingId) {
@@ -178,7 +194,8 @@ export async function DELETE(request: Request, { params }: LikeRouteContext) {
     }
 
     const visitorId = getVisitorId(request)
-    const { error } = await supabaseServer
+    const likeClient = getLikeClient(visitorId)
+    const { error } = await likeClient
       .from('listing_likes')
       .delete()
       .eq('listing_id', listingId)
@@ -186,7 +203,7 @@ export async function DELETE(request: Request, { params }: LikeRouteContext) {
 
     if (error) throw error
 
-    const state = await getLikeState(listingId, visitorId)
+    const state = await getLikeState(listingId, visitorId, likeClient)
     return jsonWithVisitorCookie(state, visitorId)
   } catch (error) {
     console.error('Failed to unlike listing:', error)

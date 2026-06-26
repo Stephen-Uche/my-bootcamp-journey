@@ -51,7 +51,10 @@ export default async function ListingDetailPage({ params }: ListingDetailPagePro
       </div>
 
       <section className="grid gap-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
-        <ListingPhotoGallery photos={photos} title={listing.title} />
+        <div className="space-y-3">
+          <ListingPhotoGallery photos={photos} title={listing.title} />
+          <LikeButton className="w-full sm:w-auto" listingId={listing.id} />
+        </div>
 
         <aside className="space-y-4">
           <Card>
@@ -68,10 +71,7 @@ export default async function ListingDetailPage({ params }: ListingDetailPagePro
               <p className="text-sm text-gray-500">Listed {formatDate(listing.created_at)}</p>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-4xl font-bold text-blue-600">SEK {listing.price.toFixed(0)}</p>
-                <LikeButton listingId={listing.id} />
-              </div>
+              <p className="text-4xl font-bold text-blue-600">SEK {listing.price.toFixed(0)}</p>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-lg bg-gray-50 p-3">
                   <p className="text-gray-500">Status</p>

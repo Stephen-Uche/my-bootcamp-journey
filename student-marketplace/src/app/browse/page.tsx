@@ -111,24 +111,27 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
           {listings.map((listing) => (
             <Card key={listing.id} className="transition hover:border-sky-300 hover:shadow-md">
               <div className="grid gap-4 p-4 sm:grid-cols-[150px_1fr] lg:grid-cols-[170px_1fr_auto] lg:items-center">
-                <Link
-                  aria-label={`View ${listing.title}`}
-                  className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-md bg-slate-100"
-                  href={`/listing/${listing.id}`}
-                >
-                  {listing.photos?.[0] ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      alt={listing.title}
-                      className="h-full w-full object-contain"
-                      src={listing.photos[0]}
-                    />
-                  ) : (
-                    <div className="text-sm text-slate-500">
-                      No photo
-                    </div>
-                  )}
-                </Link>
+                <div className="space-y-2">
+                  <Link
+                    aria-label={`View ${listing.title}`}
+                    className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-md bg-slate-100"
+                    href={`/listing/${listing.id}`}
+                  >
+                    {listing.photos?.[0] ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        alt={listing.title}
+                        className="h-full w-full object-contain"
+                        src={listing.photos[0]}
+                      />
+                    ) : (
+                      <div className="text-sm text-slate-500">
+                        No photo
+                      </div>
+                    )}
+                  </Link>
+                  <LikeButton className="w-full" listingId={listing.id} />
+                </div>
                 <div className="min-w-0">
                   <CardTitle className="line-clamp-1 text-lg">
                     <Link className="hover:text-sky-700" href={`/listing/${listing.id}`}>
@@ -142,7 +145,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                     {listing.description}
                   </p>
                 </div>
-                <div className="flex items-end justify-between gap-3 sm:col-span-2 lg:col-span-1 lg:flex-col lg:items-end lg:text-right">
+                <div className="text-left sm:col-span-2 lg:col-span-1 lg:text-right">
                   <div>
                     <p className="text-2xl font-bold text-sky-700">
                       SEK {listing.price.toFixed(0)}
@@ -151,7 +154,6 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                       Available
                     </p>
                   </div>
-                  <LikeButton listingId={listing.id} />
                 </div>
               </div>
             </Card>
