@@ -98,9 +98,13 @@ function getListingId(params: LikeRouteContext['params']): string | null {
   return id
 }
 
-function getLikeClient(visitorId: string) {
+function getLikeClient(visitorId: string, requireServiceRole = false) {
   if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return supabaseServer
+  }
+
+  if (requireServiceRole) {
+    return null
   }
 
   if (!supabaseUrl || !supabaseAnonKey) {
@@ -135,6 +139,16 @@ function likesTableMissingResponse() {
   )
 }
 
+function serviceRoleMissingResponse() {
+  return NextResponse.json(
+    {
+      error:
+        'Product likes cannot be saved because SUPABASE_SERVICE_ROLE_KEY is missing in the server environment.',
+    },
+    { status: 503 }
+  )
+}
+
 export async function GET(request: Request, { params }: LikeRouteContext) {
   if (!isSupabaseConfigured) {
     return NextResponse.json({ error: 'Supabase is not configured.' }, { status: 503 })
@@ -148,6 +162,10 @@ export async function GET(request: Request, { params }: LikeRouteContext) {
 
     const visitorId = getVisitorId(request)
     const likeClient = getLikeClient(visitorId)
+    if (!likeClient) {
+      return serviceRoleMissingResponse()
+    }
+
     const listingExists = await ensureAvailableListing(listingId)
 
     if (!listingExists) {
@@ -178,7 +196,11 @@ export async function POST(request: Request, { params }: LikeRouteContext) {
     }
 
     const visitorId = getVisitorId(request)
-    const likeClient = getLikeClient(visitorId)
+    const likeClient = getLikeClient(visitorId, true)
+    if (!likeClient) {
+      return serviceRoleMissingResponse()
+    }
+
     const listingExists = await ensureAvailableListing(listingId)
 
     if (!listingExists) {
@@ -221,7 +243,11 @@ export async function DELETE(request: Request, { params }: LikeRouteContext) {
     }
 
     const visitorId = getVisitorId(request)
-    const likeClient = getLikeClient(visitorId)
+    const likeClient = getLikeClient(visitorId, true)
+    if (!likeClient) {
+      return serviceRoleMissingResponse()
+    }
+
     const { error } = await likeClient
       .from('listing_likes')
       .delete()

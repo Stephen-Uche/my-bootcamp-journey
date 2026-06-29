@@ -77,7 +77,11 @@ src/backend/lib/supabase-client.ts
 
 The app requires `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to start.
 `SUPABASE_SERVICE_ROLE_KEY` is required for server-side flows that read protected data, such
-as the authenticated seller contact endpoint.
+as the authenticated seller contact endpoint and anonymous product likes.
+
+When deploying to Vercel, add all three values under Project Settings -> Environment Variables.
+If `SUPABASE_SERVICE_ROLE_KEY` is missing in Vercel, product like counts can be read but cannot
+be saved from the deployed site.
 
 ### Configure email sign-in
 

@@ -12,6 +12,10 @@ type LikeState = {
   likesCount: number
 }
 
+type LikeError = {
+  error?: string
+}
+
 const visitorStorageKey = 'student_marketplace_visitor_id'
 
 function createBrowserVisitorId() {
@@ -52,7 +56,8 @@ export default function LikeButton({ listingId, className = '' }: LikeButtonProp
         })
 
         if (!response.ok) {
-          setErrorMessage('Likes are not available yet.')
+          const data = (await response.json().catch(() => null)) as LikeError | null
+          setErrorMessage(data?.error || 'Likes are not available yet.')
           return
         }
 
@@ -93,14 +98,17 @@ export default function LikeButton({ listingId, className = '' }: LikeButtonProp
         method: nextLiked ? 'POST' : 'DELETE',
       })
 
-      if (!response.ok) throw new Error('Failed to save like')
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as LikeError | null
+        throw new Error(data?.error || 'Failed to save like')
+      }
 
       const data = (await response.json()) as LikeState
       setLiked(data.liked)
       setLikesCount(data.likesCount)
     } catch (error) {
       console.error('Failed to update like:', error)
-      setErrorMessage('Could not save like.')
+      setErrorMessage(error instanceof Error ? error.message : 'Could not save like.')
     } finally {
       setIsSaving(false)
       setIsLoading(false)
