@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   description: 'Buy and sell used items with verified students',
 }
 
+const contactPhoneDisplay = '073 490 09 34'
+const contactPhoneHref = 'tel:+46734900934'
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -43,11 +46,19 @@ export default function RootLayout({
               </ul>
             </div>
             <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-sky-200">Trust</h3>
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-sky-200">Contact</h3>
               <ul className="mt-3 space-y-2 text-sm text-slate-300">
-                <li>Verified email access</li>
-                <li>Public handoff guidance</li>
-                <li>Admin moderation</li>
+                <li>
+                  <a className="font-medium text-white hover:text-sky-200" href={contactPhoneHref}>
+                    {contactPhoneDisplay}
+                  </a>
+                </li>
+                <li>Call or text for marketplace support.</li>
+                <li>
+                  <a className="text-sky-200 hover:text-white" href="/contact">
+                    Contact page
+                  </a>
+                </li>
               </ul>
             </div>
           </div>

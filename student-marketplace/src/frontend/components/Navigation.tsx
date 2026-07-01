@@ -67,6 +67,9 @@ export function Navigation() {
           <Link href="/browse">
             <Button variant="ghost">Browse</Button>
           </Link>
+          <Link href="/contact">
+            <Button variant="ghost">Contact</Button>
+          </Link>
           <Link href="/feedback">
             <Button variant="ghost">Feedback</Button>
           </Link>
